@@ -20,7 +20,6 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="entry" options={{ presentation: 'modal', headerShown: true, title: 'Log a day' }} />
-          <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly report' }} />
           <Stack.Screen name="expenses" options={{ headerShown: true, title: 'Expenses' }} />
           <Stack.Screen name="mileage" options={{ headerShown: true, title: 'Mileage' }} />
           <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & tickets' }} />

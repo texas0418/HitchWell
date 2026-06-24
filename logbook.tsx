@@ -2,96 +2,92 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { colors } from '../../theme/colors';
 import { AmountText } from '../../components/AmountText';
+import { useStore, DayType } from '../../lib/store';
+import * as calc from '../../lib/calc';
+import { dow, dayNum, money, todayISO } from '../../lib/format';
 
-// --- Mock data. Replace with Supabase (entries for the selected month). ---
-type Entry = {
-  dow: string;
-  day: string;
-  title?: string;
-  sub?: string;
-  amount?: string;
-  off?: boolean;
-  empty?: boolean; // today, not yet logged
+const TYPE_LABEL: Record<DayType, string> = {
+  worked: 'Worked',
+  travel: 'Travel day',
+  standby: 'Standby',
+  off: 'Off',
 };
 
-const month = 'June';
-const running = '$11,025';
-const taxSetAside = '$2,975';
-
-const entries: Entry[] = [
-  { dow: 'Tue', day: '20', empty: true },
-  { dow: 'Mon', day: '19', title: 'Worked · Midland, TX', sub: 'per diem · TX', amount: '$525' },
-  { dow: 'Sun', day: '18', title: 'Travel day · mobe', sub: '412 mi', amount: '$200' },
-  { dow: 'Sat', day: '17', title: 'Standby · weather', sub: 'NM', amount: '$300' },
-  { dow: 'Fri', day: '16', title: 'Worked · Midland, TX', sub: 'per diem · TX', amount: '$525' },
-  { dow: 'Thu', day: '15', off: true },
-  { dow: 'Wed', day: '14', title: 'Worked · Hobbs, NM', sub: 'per diem · NM', amount: '$525' },
-];
-
 export default function LogbookScreen() {
+  const router = useRouter();
+  const { dayEntries } = useStore();
+  const year = new Date().getFullYear();
+
+  const sorted = [...dayEntries].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const running = calc.income(dayEntries, year);
+  const setAside = calc.taxSetAside(running, useStore.getState().profile);
+  const hasToday = dayEntries.some((d) => d.date === todayISO());
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <View style={styles.monthRow}>
-          <Ionicons name="chevron-back" size={16} color={colors.faint} />
-          <Text style={styles.month}>{month}</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.faint} />
-        </View>
+        <Text style={styles.title}>Logbook</Text>
         <View style={styles.totals}>
-          <View style={styles.totalLine}>
-            <Text style={styles.totalLabel}>running </Text>
-            <AmountText style={styles.totalValue}>{running}</AmountText>
-          </View>
-          <View style={styles.totalLine}>
-            <Text style={styles.totalLabel}>tax </Text>
-            <AmountText style={[styles.totalValue, { color: colors.danger }]}>{taxSetAside}</AmountText>
-          </View>
+          <Text style={styles.totalLabel}>YTD </Text>
+          <AmountText style={styles.totalValue}>{money(running)}</AmountText>
+          <Text style={styles.totalLabel}>  ·  tax </Text>
+          <AmountText style={[styles.totalValue, { color: colors.danger }]}>{money(setAside)}</AmountText>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {entries.map((e) => {
-          if (e.empty) {
-            return (
-              <Pressable key={e.day} style={styles.emptyRow}>
-                <View style={styles.dateCol}>
-                  <Text style={styles.dow}>{e.dow}</Text>
-                  <Text style={styles.dayNum}>{e.day}</Text>
-                </View>
-                <View style={styles.emptyTextRow}>
-                  <Ionicons name="add" size={14} color={colors.muted} />
-                  <Text style={styles.emptyText}>Tap to log today</Text>
-                </View>
-              </Pressable>
-            );
-          }
-          return (
-            <Pressable key={e.day} style={[styles.row, e.off && styles.rowOff]}>
-              <View style={styles.dateCol}>
-                <Text style={styles.dow}>{e.dow}</Text>
-                <Text style={styles.dayNum}>{e.day}</Text>
+        {!hasToday && (
+          <Pressable style={styles.emptyRow} onPress={() => router.push('/entry')}>
+            <View style={styles.dateCol}>
+              <Text style={styles.dow}>{dow(todayISO())}</Text>
+              <Text style={styles.dayNum}>{dayNum(todayISO())}</Text>
+            </View>
+            <View style={styles.emptyTextRow}>
+              <Ionicons name="add" size={14} color={colors.muted} />
+              <Text style={styles.emptyText}>Tap to log today</Text>
+            </View>
+          </Pressable>
+        )}
+
+        {sorted.map((e) => (
+          <Pressable
+            key={e.id}
+            style={[styles.row, e.type === 'off' && styles.rowOff]}
+            onPress={() => router.push({ pathname: '/entry', params: { id: e.id } })}
+          >
+            <View style={styles.dateCol}>
+              <Text style={styles.dow}>{dow(e.date)}</Text>
+              <Text style={styles.dayNum}>{dayNum(e.date)}</Text>
+            </View>
+            {e.type === 'off' ? (
+              <Text style={styles.offText}>Off</Text>
+            ) : (
+              <View style={styles.body}>
+                <Text style={styles.rowTitle}>
+                  {TYPE_LABEL[e.type]}{e.location ? ` · ${e.location}` : ''}
+                </Text>
+                <Text style={styles.sub}>
+                  {[e.perDiem ? 'per diem' : null, e.state || null, e.client || null].filter(Boolean).join(' · ') || '—'}
+                </Text>
               </View>
-              {e.off ? (
-                <Text style={styles.offText}>Off</Text>
-              ) : (
-                <View style={styles.body}>
-                  <Text style={styles.title}>{e.title}</Text>
-                  {!!e.sub && <Text style={styles.sub}>{e.sub}</Text>}
-                </View>
-              )}
-              {e.off ? (
-                <Text style={styles.dash}>—</Text>
-              ) : (
-                <AmountText style={styles.amount}>{e.amount}</AmountText>
-              )}
-            </Pressable>
-          );
-        })}
+            )}
+            {e.type === 'off' ? (
+              <Text style={styles.dash}>—</Text>
+            ) : (
+              <AmountText style={styles.amount}>{money(e.rate)}</AmountText>
+            )}
+          </Pressable>
+        ))}
+
+        {sorted.length === 0 && hasToday && (
+          <Text style={styles.emptyNote}>No other entries yet.</Text>
+        )}
       </ScrollView>
 
-      <Pressable style={styles.fab} accessibilityLabel="Add entry">
+      <Pressable style={styles.fab} onPress={() => router.push('/entry')} accessibilityLabel="Add entry">
         <Ionicons name="add" size={26} color="#fff" />
       </Pressable>
     </SafeAreaView>
@@ -100,14 +96,11 @@ export default function LogbookScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12 },
-  monthRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  month: { fontSize: 18, fontWeight: '500', color: colors.ink },
-  totals: { alignItems: 'flex-end' },
-  totalLine: { flexDirection: 'row', alignItems: 'center' },
-  totalLabel: { fontSize: 11, color: colors.muted },
-  totalValue: { fontSize: 11, fontWeight: '500', color: colors.ink },
+  header: { paddingHorizontal: 18, paddingVertical: 12 },
+  title: { fontSize: 22, fontWeight: '500', color: colors.ink, marginBottom: 4 },
+  totals: { flexDirection: 'row', alignItems: 'center' },
+  totalLabel: { fontSize: 12, color: colors.muted },
+  totalValue: { fontSize: 12, fontWeight: '500', color: colors.ink },
 
   list: { paddingBottom: 96 },
 
@@ -118,29 +111,19 @@ const styles = StyleSheet.create({
   },
   emptyTextRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   emptyText: { fontSize: 13, color: colors.muted },
+  emptyNote: { fontSize: 13, color: colors.muted, padding: 18 },
 
-  row: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 18, paddingVertical: 13,
-    borderTopWidth: 0.5, borderTopColor: colors.hairline2,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 18, paddingVertical: 13, borderTopWidth: 0.5, borderTopColor: colors.hairline2 },
   rowOff: { opacity: 0.55 },
-
   dateCol: { width: 36, alignItems: 'center' },
   dow: { fontSize: 11, color: colors.muted },
   dayNum: { fontSize: 16, color: colors.ink },
-
   body: { flex: 1 },
-  title: { fontSize: 14, color: colors.ink },
+  rowTitle: { fontSize: 14, color: colors.ink },
   sub: { fontSize: 11, color: colors.muted, marginTop: 2 },
   offText: { flex: 1, fontSize: 14, color: colors.muted },
-
   amount: { fontSize: 14, fontWeight: '500', color: colors.ink },
   dash: { fontSize: 14, color: colors.faint },
 
-  fab: {
-    position: 'absolute', right: 16, bottom: 24,
-    width: 52, height: 52, borderRadius: 26, backgroundColor: colors.ink,
-    alignItems: 'center', justifyContent: 'center',
-  },
+  fab: { position: 'absolute', right: 16, bottom: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
 });

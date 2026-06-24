@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "HitchWell",
+    "slug": "hitchwell",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "hitchwell",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.page4films.hitchwell"
+    },
+    "android": {
+      "package": "com.page4films.hitchwell"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Reveal your income and expense amounts." }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "HitchWell attaches receipt photos to your expenses.",
+          "cameraPermission": "HitchWell uses the camera to capture receipt photos."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
