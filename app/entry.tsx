@@ -6,7 +6,7 @@ import { Chip } from '../components/Chip';
 import { ClientField } from '../components/ClientField';
 import { DateField } from '../components/DateField';
 import { useStore, DayType } from '../lib/store';
-import { firstLastMie } from '../lib/perdiem';
+import { firstLastMie, mieForLocation, findArea } from '../lib/perdiem';
 import { todayISO } from '../lib/format';
 
 const TYPES: { key: DayType; label: string }[] = [
@@ -117,19 +117,31 @@ export default function EntryScreen() {
                 placeholder="0"
                 placeholderTextColor={colors.faint}
               />
-              <View style={styles.chipRow}>
-                <Chip
-                  label={`Full $${profile.perDiemMie}`}
-                  selected={Number(perDiemAmt) === profile.perDiemMie}
-                  onPress={() => setPerDiemAmt(String(profile.perDiemMie))}
-                />
-                <Chip
-                  label={`Travel day 75% $${firstLastMie(profile.perDiemMie)}`}
-                  selected={Number(perDiemAmt) === firstLastMie(profile.perDiemMie)}
-                  onPress={() => setPerDiemAmt(String(firstLastMie(profile.perDiemMie)))}
-                />
-              </View>
-              <Text style={styles.perDiemNote}>Defaults to your GSA M&IE rate. Use 75% for first and last travel days.</Text>
+              {(() => {
+                const areaMie = mieForLocation(state, location, profile.perDiemMie);
+                const area = findArea(state, location);
+                return (
+                  <>
+                    <View style={styles.chipRow}>
+                      <Chip
+                        label={`Full $${areaMie}`}
+                        selected={Number(perDiemAmt) === areaMie}
+                        onPress={() => setPerDiemAmt(String(areaMie))}
+                      />
+                      <Chip
+                        label={`Travel day 75% $${firstLastMie(areaMie)}`}
+                        selected={Number(perDiemAmt) === firstLastMie(areaMie)}
+                        onPress={() => setPerDiemAmt(String(firstLastMie(areaMie)))}
+                      />
+                    </View>
+                    <Text style={styles.perDiemNote}>
+                      {area
+                        ? `GSA rate for ${area.city}: $${areaMie} M&IE. Use 75% for first and last travel days.`
+                        : `Standard GSA M&IE is $${profile.perDiemMie}. Use 75% for first and last travel days.`}
+                    </Text>
+                  </>
+                );
+              })()}
             </View>
           )}
         </>

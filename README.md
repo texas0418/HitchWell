@@ -99,3 +99,20 @@ Placeholder / next layer:
 
 Confirm the name in App Store Connect (create the app record to reserve it),
 run "HitchWell" through USPTO TESS, and grab hitchwell.com and the social handle.
+
+## Refreshing GSA per diem data
+
+The per-diem M&IE rates live in `lib/perdiemData.ts` (296 non-standard areas for
+FY2026, generated from GSA's official master file). M&IE auto-fills on the day
+entry when the logged location matches an area; everything else uses the standard
+$68. GSA publishes new rates each August, effective October 1. To refresh:
+
+1. Download the Per Diem Master Rates File from
+   https://www.gsa.gov/travel/plan-book/per-diem-rates/per-diem-files
+2. `npm i -D xlsx`
+3. `node scripts/import-perdiem.mjs ~/Downloads/FY20XX_PerDiemMasterRatesFile.xlsx`
+
+That overwrites `lib/perdiemData.ts`. The standard CONUS rate and M&IE tiers in
+`lib/perdiem.ts` are separate; update those if GSA changes them (held flat for
+FY2026 at $110 lodging / $68 M&IE).
+
