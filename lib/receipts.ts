@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // Receipts are stored as files in the app's document directory. Only the file
 // path is kept on the expense. Photos must never go in the persisted store,
