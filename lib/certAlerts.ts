@@ -1,7 +1,33 @@
 import { Alert, Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 import { Cert } from './store';
 import { daysUntil, fromISO } from './format';
+
+// expo-notifications needs native modules that only exist in dev builds made
+// after it was installed. Check for the native side first, so older builds
+// fall back to in-app reminders without requiring the package at all.
+let Notifications: typeof import('expo-notifications') | null = null;
+let checked = false;
+function getNotifications() {
+  if (checked) return Notifications;
+  checked = true;
+  if (!requireOptionalNativeModule('ExpoPushTokenManager')) return null;
+  try {
+    Notifications = require('expo-notifications');
+    Notifications!.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+    return Notifications;
+  } catch {
+    Notifications = null;
+    return null;
+  }
+}
 
 // Cert expiry alerts, two layers:
 // 1. Local push notifications scheduled at 30 days before expiry and on the
@@ -11,30 +37,23 @@ import { daysUntil, fromISO } from './format';
 
 const WARN_DAYS = 30;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 export async function syncCertNotifications(certs: Cert[]): Promise<void> {
+  const N = getNotifications();
+  if (!N) return; // native module absent (older dev build); in-app reminders still work
   try {
-    const perm = await Notifications.getPermissionsAsync();
+    const perm = await N.getPermissionsAsync();
     if (!perm.granted) {
-      const req = await Notifications.requestPermissionsAsync();
+      const req = await N.requestPermissionsAsync();
       if (!req.granted) return;
     }
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('certs', {
+      await N.setNotificationChannelAsync('certs', {
         name: 'Cert expiry',
-        importance: Notifications.AndroidImportance.DEFAULT,
+        importance: N.AndroidImportance.DEFAULT,
       });
     }
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await N.cancelAllScheduledNotificationsAsync();
 
     const now = Date.now();
     for (const c of certs) {
@@ -43,15 +62,15 @@ export async function syncCertNotifications(certs: Cert[]): Promise<void> {
 
       const warnAt = new Date(expiry.getTime() - WARN_DAYS * 86400000);
       if (warnAt.getTime() > now) {
-        await Notifications.scheduleNotificationAsync({
+        await N.scheduleNotificationAsync({
           content: { title: 'Cert expiring soon', body: `${c.name} expires in ${WARN_DAYS} days.` },
-          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: warnAt },
+          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: warnAt },
         });
       }
       if (expiry.getTime() > now) {
-        await Notifications.scheduleNotificationAsync({
+        await N.scheduleNotificationAsync({
           content: { title: 'Cert expired', body: `${c.name} expires today. Renew it.` },
-          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: expiry },
+          trigger: { type: N.SchedulableTriggerInputTypes.DATE, date: expiry },
         });
       }
     }
