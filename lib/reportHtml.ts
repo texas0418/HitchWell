@@ -1,5 +1,6 @@
 import { Profile, CATEGORY_LABEL } from './store';
 import { MonthlyReport, clientLabel } from './report';
+import { ReceiptItem } from './receiptEmbed';
 import { money, num, monthLabel, longDateYear, todayISO } from './format';
 
 // Builds a clean, printable HTML document for the month report. expo-print
@@ -9,7 +10,7 @@ import { money, num, monthLabel, longDateYear, todayISO } from './format';
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-export function buildReportHtml(r: MonthlyReport, profile: Profile): string {
+export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: ReceiptItem[] = []): string {
   const preparedBy = profile.name?.trim() ? esc(profile.name.trim()) : '';
 
   const clientBlocks = r.clients
@@ -23,6 +24,25 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile): string {
             </tr>`
         )
         .join('');
+
+      const clientReceipts = receipts.filter((x) => x.client === c.client);
+      const receiptBlock = clientReceipts.length
+        ? `
+          <div class="receipts">
+            <h3>Receipts (${clientReceipts.length})</h3>
+            <div class="receipt-grid">
+              ${clientReceipts
+                .map(
+                  (x) => `
+                <figure class="receipt">
+                  <img src="${x.dataUri}" />
+                  <figcaption>${esc(x.label)}</figcaption>
+                </figure>`
+                )
+                .join('')}
+            </div>
+          </div>`
+        : '';
 
       return `
         <section class="client">
@@ -40,6 +60,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile): string {
               ${c.deductible > 0 ? `<tr class="muted"><td>Your deductions (not billed)</td><td class="amt">${money(c.deductible)}</td></tr>` : ''}
             </tbody>
           </table>
+          ${receiptBlock}
         </section>`;
     })
     .join('');
@@ -56,7 +77,12 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile): string {
   .doc-sub { color: #6b6b66; margin: 4px 0 2px; }
   .doc-dates { color: #6b6b66; font-size: 12px; }
   hr { border: none; border-top: 1px solid #e4e4df; margin: 20px 0; }
-  .client { margin-bottom: 22px; page-break-after: always; page-break-inside: avoid; }
+  .client { margin-bottom: 22px; page-break-after: always; }
+  .receipts h3 { font-size: 12px; color: #6b6b66; font-weight: 600; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .receipt-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .receipt { margin: 0; width: 46%; page-break-inside: avoid; }
+  .receipt img { width: 100%; border: 1px solid #e4e4df; border-radius: 4px; }
+  .receipt figcaption { font-size: 10px; color: #6b6b66; margin-top: 3px; }
   .client-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #e4e4df; padding-bottom: 6px; }
   .client-head h2 { font-size: 15px; font-weight: 600; margin: 0; }
   .invoice { font-size: 18px; font-weight: 700; color: #185FA5; text-align: right; }

@@ -4,12 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { colors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { useStore, CATEGORY_LABEL } from '../lib/store';
 import { buildMonthlyReport, buildReportText, clientLabel } from '../lib/report';
 import { buildReportHtml } from '../lib/reportHtml';
-import { money, num, monthLabel, addMonths, longDateYear } from '../lib/format';
+import { buildReceiptItems } from '../lib/receiptEmbed';
+import { money, num, monthLabel, addMonths, longDateYear, monthName } from '../lib/format';
 
 export default function ReportScreen() {
   const { dayEntries, expenses, mileage, profile } = useStore();
@@ -26,10 +28,23 @@ export default function ReportScreen() {
 
   const onExportPdf = async () => {
     try {
-      const html = buildReportHtml(report, profile);
+      // Read this month's receipt photos and embed them per client.
+      const receipts = await buildReceiptItems(expenses, ym.year, ym.month);
+      const html = buildReportHtml(report, profile, receipts);
       const { uri } = await Print.printToFileAsync({ html });
+
+      // Give the file a real name before sharing.
+      const named = `${FileSystem.cacheDirectory}HitchWell_${monthName(ym.month)}_${ym.year}.pdf`;
+      let shareUri = uri;
+      try {
+        await FileSystem.moveAsync({ from: uri, to: named });
+        shareUri = named;
+      } catch {
+        // rename failed; share the temp file rather than nothing
+      }
+
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: `HitchWell ${monthLabel(ym.year, ym.month)}` });
+        await Sharing.shareAsync(shareUri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: `HitchWell ${monthLabel(ym.year, ym.month)}` });
       } else {
         await Print.printAsync({ html });
       }
