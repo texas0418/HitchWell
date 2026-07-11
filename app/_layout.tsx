@@ -3,12 +3,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PrivacyProvider } from '../context/PrivacyContext';
-import { useTheme } from '../theme/colors';
+import { useTheme, useScheme } from '../theme/colors';
 import { useStore, useHydrated } from '../lib/store';
 import { syncCertNotifications, showCertReminderOnce } from '../lib/certAlerts';
 
 export default function RootLayout() {
   const t = useTheme();
+  const scheme = useScheme();
   const hydrated = useHydrated();
   const certs = useStore((s) => s.certs);
   const onboarded = useStore((s) => s.onboarded);
@@ -24,7 +25,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PrivacyProvider>
-        <StatusBar style="auto" />
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Stack
           screenOptions={{
             headerShown: false,

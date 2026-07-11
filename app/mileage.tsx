@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { ClientField } from '../components/ClientField';
 import { useStore } from '../lib/store';
@@ -10,6 +10,8 @@ import * as calc from '../lib/calc';
 import { money, num, todayISO, longDate } from '../lib/format';
 
 export default function MileageScreen() {
+  const t = useTheme();
+  const styles = React.useMemo(() => makeStyles(t), [t]);
   const { mileage, profile, addMileage, removeMileage } = useStore();
   const year = new Date().getFullYear();
   const totalMiles = calc.totalMileage(mileage, year);
@@ -47,16 +49,16 @@ export default function MileageScreen() {
         {open ? (
           <View style={styles.form}>
             <Text style={styles.label}>Miles</Text>
-            <TextInput style={styles.input} value={miles} onChangeText={setMiles} keyboardType="number-pad" placeholder="0" placeholderTextColor={colors.faint} />
+            <TextInput style={styles.input} value={miles} onChangeText={setMiles} keyboardType="number-pad" placeholder="0" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Purpose</Text>
-            <TextInput style={styles.input} value={purpose} onChangeText={setPurpose} placeholder="e.g. home to location" placeholderTextColor={colors.faint} />
+            <TextInput style={styles.input} value={purpose} onChangeText={setPurpose} placeholder="e.g. home to location" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Client / job</Text>
             <ClientField value={client} onChange={setClient} />
             <Pressable style={styles.addBtn} onPress={add}><Text style={styles.addText}>Add trip</Text></Pressable>
           </View>
         ) : (
           <Pressable style={styles.openBtn} onPress={() => setOpen(true)}>
-            <Ionicons name="add" size={18} color={colors.ink} />
+            <Ionicons name="add" size={18} color={t.ink} />
             <Text style={styles.openText}>Add trip</Text>
           </Pressable>
         )}
@@ -67,7 +69,7 @@ export default function MileageScreen() {
               <Text style={styles.rowTitle}>{num(m.miles)} mi{m.purpose ? ` · ${m.purpose}` : ''}</Text>
               <Text style={styles.rowSub}>{[longDate(m.date), m.client].filter(Boolean).join(' · ')}</Text>
             </View>
-            <Pressable hitSlop={8} onPress={() => removeMileage(m.id)}><Ionicons name="trash-outline" size={18} color={colors.faint} /></Pressable>
+            <Pressable hitSlop={8} onPress={() => removeMileage(m.id)}><Ionicons name="trash-outline" size={18} color={t.faint} /></Pressable>
           </View>
         ))}
       </ScrollView>
@@ -75,26 +77,26 @@ export default function MileageScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+const makeStyles = (t: AppColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: t.bg },
   content: { padding: 18, paddingBottom: 40 },
 
-  summary: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.surface, borderRadius: 12, padding: 16 },
-  sumLabel: { fontSize: 12, color: colors.muted },
-  sumValue: { fontSize: 20, fontWeight: '500', color: colors.ink, marginTop: 2 },
-  rateNote: { fontSize: 12, color: colors.muted, marginTop: 8, marginBottom: 16 },
+  summary: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: t.surface, borderRadius: 12, padding: 16 },
+  sumLabel: { fontSize: 12, color: t.muted },
+  sumValue: { fontSize: 20, fontWeight: '500', color: t.ink, marginTop: 2 },
+  rateNote: { fontSize: 12, color: t.muted, marginTop: 8, marginBottom: 16 },
 
-  form: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 14, padding: 14, marginBottom: 12 },
-  label: { fontSize: 12, color: colors.muted, marginTop: 12, marginBottom: 8 },
-  input: { height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, fontSize: 16, color: colors.ink },
-  addBtn: { backgroundColor: colors.ink, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 18 },
-  addText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  form: { borderWidth: 0.5, borderColor: t.border, borderRadius: 14, padding: 14, marginBottom: 12 },
+  label: { fontSize: 12, color: t.muted, marginTop: 12, marginBottom: 8 },
+  input: { height: 44, borderWidth: 0.5, borderColor: t.border, borderRadius: 10, paddingHorizontal: 14, fontSize: 16, color: t.ink },
+  addBtn: { backgroundColor: t.ink, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 18 },
+  addText: { color: t.onInk, fontSize: 15, fontWeight: '500' },
 
-  openBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 0.5, borderColor: colors.border, borderStyle: 'dashed', borderRadius: 12, paddingVertical: 13, marginBottom: 12 },
-  openText: { fontSize: 14, color: colors.ink },
+  openBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 0.5, borderColor: t.border, borderStyle: 'dashed', borderRadius: 12, paddingVertical: 13, marginBottom: 12 },
+  openText: { fontSize: 14, color: t.ink },
 
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, borderTopWidth: 0.5, borderTopColor: colors.hairline2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, borderTopWidth: 0.5, borderTopColor: t.hairline2 },
   rowBody: { flex: 1 },
-  rowTitle: { fontSize: 14, color: colors.ink },
-  rowSub: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  rowTitle: { fontSize: 14, color: t.ink },
+  rowSub: { fontSize: 11, color: t.muted, marginTop: 2 },
 });

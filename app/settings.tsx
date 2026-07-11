@@ -7,14 +7,14 @@ import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { NumField } from '../components/NumField';
 import { StatePicker } from '../components/StatePicker';
-import { useStore, PayPeriod, PAY_PERIODS } from '../lib/store';
+import { useStore, PayPeriod, PAY_PERIODS, Appearance } from '../lib/store';
 import { clearAllReceipts } from '../lib/receipts';
 
 export default function SettingsScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient } = useStore();
+  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, appearance, setAppearance } = useStore();
 
   const [name, setName] = useState(profile.name);
   const [rate, setRate] = useState(String(profile.defaultDayRate));
@@ -84,6 +84,19 @@ export default function SettingsScreen() {
 
         <Text style={s.label}>Home State</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
+
+        <Text style={s.label}>Appearance</Text>
+        <View style={s.chipRow}>
+          {(['system', 'light', 'dark'] as Appearance[]).map((a) => (
+            <Chip
+              key={a}
+              label={a === 'system' ? 'System' : a === 'light' ? 'Light' : 'Dark'}
+              selected={appearance === a}
+              onPress={() => setAppearance(a)}
+            />
+          ))}
+        </View>
+        <Text style={s.note}>Applies immediately. System follows your phone setting.</Text>
 
         <Text style={s.label}>Pay Period</Text>
         <View style={s.chipRow}>

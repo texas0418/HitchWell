@@ -3,6 +3,7 @@
 // stays as the light palette so not-yet-restyled screens keep compiling.
 
 import { useColorScheme } from 'react-native';
+import { useStore } from '../lib/store';
 
 export type AppColors = {
   bg: string;
@@ -72,9 +73,17 @@ export const dark: AppColors = {
   },
 };
 
-// Active palette for the current system appearance.
+// Resolved scheme: the in-app preference wins; 'system' follows the phone.
+export function useScheme(): 'light' | 'dark' {
+  const system = useColorScheme();
+  const pref = useStore((s) => s.appearance);
+  if (pref === 'light' || pref === 'dark') return pref;
+  return system === 'dark' ? 'dark' : 'light';
+}
+
+// Active palette for the resolved scheme.
 export function useTheme(): AppColors {
-  return useColorScheme() === 'dark' ? dark : light;
+  return useScheme() === 'dark' ? dark : light;
 }
 
 // Back-compat static export (light). Restyled screens use useTheme() instead.

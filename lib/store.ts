@@ -95,9 +95,12 @@ export type Profile = {
   standbyDayRate: number;    // 0 = same as defaultDayRate
 };
 
+export type Appearance = 'system' | 'light' | 'dark';
+
 type State = {
   profile: Profile;
   onboarded: boolean;
+  appearance: Appearance;
   clients: string[];
   dayEntries: DayEntry[];
   expenses: Expense[];
@@ -105,6 +108,7 @@ type State = {
   certs: Cert[];
 
   setOnboarded: (v: boolean) => void;
+  setAppearance: (a: Appearance) => void;
   addClient: (name: string) => void;
   removeClient: (name: string) => void;
 
@@ -147,6 +151,7 @@ export const useStore = create<State>()(
     (set) => ({
       profile: defaultProfile,
       onboarded: false,
+      appearance: 'system' as Appearance,
       clients: [],
       dayEntries: [],
       expenses: [],
@@ -154,6 +159,7 @@ export const useStore = create<State>()(
       certs: [],
 
       setOnboarded: (v) => set(() => ({ onboarded: v })),
+      setAppearance: (a) => set(() => ({ appearance: a })),
 
       addClient: (name) =>
         set((s) => {
@@ -218,10 +224,11 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 7,
+      version: 8,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;
+        if (!persisted.appearance) persisted.appearance = 'system';
         persisted.profile = { ...defaultProfile, ...(persisted.profile ?? {}) };
         // Older expenses had no reimbursable flag; default them to deductible.
         if (Array.isArray(persisted.expenses)) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from './Chip';
 import { useStore } from '../lib/store';
 
@@ -14,6 +14,8 @@ export function ClientField({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useTheme();
+  const styles = React.useMemo(() => makeStyles(t), [t]);
   const clients = useStore((s) => s.clients);
   const addClient = useStore((s) => s.addClient);
 
@@ -53,7 +55,7 @@ export function ClientField({
             value={draft}
             onChangeText={setDraft}
             placeholder="Client or staffing house"
-            placeholderTextColor={colors.faint}
+            placeholderTextColor={t.faint}
             autoFocus
             onSubmitEditing={commit}
             returnKeyType="done"
@@ -67,12 +69,12 @@ export function ClientField({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (t: AppColors) => StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
-  addChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 0.5, borderColor: colors.border, borderStyle: 'dashed' },
-  addText: { fontSize: 13, color: colors.muted },
+  addChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 0.5, borderColor: t.border, borderStyle: 'dashed' },
+  addText: { fontSize: 13, color: t.muted },
   addRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
-  input: { flex: 1, height: 44, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, fontSize: 16, color: colors.ink },
-  saveBtn: { paddingHorizontal: 16, justifyContent: 'center', borderRadius: 10, backgroundColor: colors.ink },
-  saveText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  input: { flex: 1, height: 44, borderWidth: 0.5, borderColor: t.border, borderRadius: 10, paddingHorizontal: 14, fontSize: 16, color: t.ink },
+  saveBtn: { paddingHorizontal: 16, justifyContent: 'center', borderRadius: 10, backgroundColor: t.ink },
+  saveText: { color: t.onInk, fontSize: 14, fontWeight: '500' },
 });

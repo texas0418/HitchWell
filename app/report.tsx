@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
-import { colors } from '../theme/colors';
+import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { useStore, CATEGORY_LABEL } from '../lib/store';
 import { buildMonthlyReport, buildReportText, clientLabel } from '../lib/report';
@@ -14,6 +14,8 @@ import { buildReceiptItems } from '../lib/receiptEmbed';
 import { money, num, monthLabel, addMonths, longDateYear, monthName } from '../lib/format';
 
 export default function ReportScreen() {
+  const t = useTheme();
+  const styles = React.useMemo(() => makeStyles(t), [t]);
   const { dayEntries, expenses, mileage, profile } = useStore();
 
   const now = new Date();
@@ -67,9 +69,9 @@ export default function ReportScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.monthRow}>
-          <Pressable style={styles.stepBtn} onPress={() => step(-1)} hitSlop={8}><Ionicons name="chevron-back" size={20} color={colors.ink} /></Pressable>
+          <Pressable style={styles.stepBtn} onPress={() => step(-1)} hitSlop={8}><Ionicons name="chevron-back" size={20} color={t.ink} /></Pressable>
           <Text style={styles.monthText}>{monthLabel(ym.year, ym.month)}</Text>
-          <Pressable style={styles.stepBtn} onPress={() => step(1)} hitSlop={8}><Ionicons name="chevron-forward" size={20} color={colors.ink} /></Pressable>
+          <Pressable style={styles.stepBtn} onPress={() => step(1)} hitSlop={8}><Ionicons name="chevron-forward" size={20} color={t.ink} /></Pressable>
         </View>
 
         {hasData ? (
@@ -152,43 +154,43 @@ export default function ReportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+const makeStyles = (t: AppColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: t.bg },
   content: { padding: 18, paddingBottom: 40 },
 
   monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  stepBtn: { width: 40, height: 40, borderRadius: 10, borderWidth: 0.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  monthText: { fontSize: 18, fontWeight: '500', color: colors.ink },
-  dates: { fontSize: 12, color: colors.muted, textAlign: 'center', marginBottom: 18 },
+  stepBtn: { width: 40, height: 40, borderRadius: 10, borderWidth: 0.5, borderColor: t.border, alignItems: 'center', justifyContent: 'center' },
+  monthText: { fontSize: 18, fontWeight: '500', color: t.ink },
+  dates: { fontSize: 12, color: t.muted, textAlign: 'center', marginBottom: 18 },
 
-  card: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 14, padding: 16, marginBottom: 12 },
+  card: { borderWidth: 0.5, borderColor: t.border, borderRadius: 14, padding: 16, marginBottom: 12 },
   cardHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  client: { fontSize: 16, fontWeight: '500', color: colors.ink, flexShrink: 1 },
-  invoice: { fontSize: 22, fontWeight: '600', color: colors.accent },
-  invoiceLabel: { fontSize: 11, color: colors.muted, textAlign: 'right', marginTop: -2, marginBottom: 8 },
+  client: { fontSize: 16, fontWeight: '500', color: t.ink, flexShrink: 1 },
+  invoice: { fontSize: 22, fontWeight: '600', color: t.accent },
+  invoiceLabel: { fontSize: 11, color: t.muted, textAlign: 'right', marginTop: -2, marginBottom: 8 },
 
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 },
   mileRight: { flexDirection: 'row', alignItems: 'center' },
-  k: { fontSize: 14, color: colors.ink },
-  v: { fontSize: 14, color: colors.ink },
-  kStrong: { fontSize: 14, fontWeight: '600', color: colors.ink },
-  vStrong: { fontSize: 14, fontWeight: '600', color: colors.ink },
-  kMuted: { fontSize: 13, color: colors.muted },
-  vMuted: { fontSize: 13, color: colors.muted },
+  k: { fontSize: 14, color: t.ink },
+  v: { fontSize: 14, color: t.ink },
+  kStrong: { fontSize: 14, fontWeight: '600', color: t.ink },
+  vStrong: { fontSize: 14, fontWeight: '600', color: t.ink },
+  kMuted: { fontSize: 13, color: t.muted },
+  vMuted: { fontSize: 13, color: t.muted },
 
   subLine: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2, paddingLeft: 12 },
-  subK: { fontSize: 12, color: colors.muted },
-  subV: { fontSize: 12, color: colors.muted },
+  subK: { fontSize: 12, color: t.muted },
+  subV: { fontSize: 12, color: t.muted },
 
-  totalCard: { backgroundColor: colors.surface, borderColor: colors.surface },
-  totalTitle: { fontSize: 12, color: colors.muted, marginBottom: 6 },
+  totalCard: { backgroundColor: t.surface, borderColor: t.surface },
+  totalTitle: { fontSize: 12, color: t.muted, marginBottom: 6 },
 
-  shareBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.ink, borderRadius: 14, paddingVertical: 15, marginTop: 6 },
-  shareText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  shareBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.ink, borderRadius: 14, paddingVertical: 15, marginTop: 6 },
+  shareText: { color: t.onInk, fontSize: 15, fontWeight: '500' },
   textBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 4 },
-  textBtnLabel: { color: colors.accent, fontSize: 14 },
-  note: { fontSize: 11, color: colors.muted, marginTop: 12, textAlign: 'center' },
+  textBtnLabel: { color: t.accent, fontSize: 14 },
+  note: { fontSize: 11, color: t.muted, marginTop: 12, textAlign: 'center' },
 
   empty: { paddingVertical: 60, alignItems: 'center' },
-  emptyText: { fontSize: 14, color: colors.muted, textAlign: 'center' },
+  emptyText: { fontSize: 14, color: t.muted, textAlign: 'center' },
 });
