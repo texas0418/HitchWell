@@ -1,7 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/colors';
 
+// Terminal-style chip: squared corners, hairline border, ink fill when selected.
 export function Chip({
   label,
   selected,
@@ -11,28 +12,24 @@ export function Chip({
   selected: boolean;
   onPress: () => void;
 }) {
+  const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipOn]}
+      style={{
+        paddingVertical: 8,
+        paddingHorizontal: 13,
+        borderRadius: 6,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: selected ? t.ink : t.border,
+        backgroundColor: selected ? t.ink : 'transparent',
+      }}
       accessibilityRole="button"
       accessibilityState={{ selected }}
     >
-      <Text style={[styles.text, selected && styles.textOn]}>{label}</Text>
+      <Text style={{ fontSize: 13, color: selected ? t.onInk : t.ink, fontWeight: selected ? '500' : '400' }}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  chip: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 0.5,
-    borderColor: colors.border,
-    backgroundColor: colors.bg,
-  },
-  chipOn: { backgroundColor: colors.ink, borderColor: colors.ink },
-  text: { fontSize: 13, color: colors.ink },
-  textOn: { color: '#fff', fontWeight: '500' },
-});

@@ -56,7 +56,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile): string {
   .doc-sub { color: #6b6b66; margin: 4px 0 2px; }
   .doc-dates { color: #6b6b66; font-size: 12px; }
   hr { border: none; border-top: 1px solid #e4e4df; margin: 20px 0; }
-  .client { margin-bottom: 22px; page-break-inside: avoid; }
+  .client { margin-bottom: 22px; page-break-after: always; page-break-inside: avoid; }
   .client-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #e4e4df; padding-bottom: 6px; }
   .client-head h2 { font-size: 15px; font-weight: 600; margin: 0; }
   .invoice { font-size: 18px; font-weight: 700; color: #185FA5; text-align: right; }

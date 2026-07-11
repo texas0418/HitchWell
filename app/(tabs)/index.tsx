@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors, stateColor } from '../../theme/colors';
+import { useTheme, stateColor, AppColors } from '../../theme/colors';
 import { usePrivacy } from '../../context/PrivacyContext';
 import { AmountText } from '../../components/AmountText';
 import { useStore } from '../../lib/store';
 import * as calc from '../../lib/calc';
 import { money, num } from '../../lib/format';
 
+// Money home — terminal/utility style. Flat rows, hairline dividers,
+// one hero number, everything else dense and left-aligned.
+
 export default function HomeScreen() {
+  const t = useTheme();
+  const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
   const { hidden, toggle } = usePrivacy();
-  const { profile, dayEntries, mileage, certs } = useStore();
+  const { profile, dayEntries, expenses, mileage, certs } = useStore();
 
   const year = new Date().getFullYear();
   const inc = calc.income(dayEntries, year);
@@ -21,7 +26,9 @@ export default function HomeScreen() {
   const net = calc.netSoFar(inc, profile);
   const states = calc.byState(dayEntries, year).slice(0, 4);
   const out = calc.daysOut(dayEntries, year);
-  const pd = calc.perDiemDays(dayEntries, year);
+  const pdTotal = calc.perDiemTotal(dayEntries, year, profile);
+  const pdDays = calc.perDiemDays(dayEntries, year);
+  const reimbOpen = calc.reimbursableTotal(expenses, year);
   const miles = calc.totalMileage(mileage, year);
 
   const nextCert = [...certs]
@@ -30,86 +37,82 @@ export default function HomeScreen() {
     .sort((a, b) => a.days - b.days)[0];
 
   const empty = dayEntries.length === 0;
+  const pctHeld = Math.round((profile.taxSetAsidePct || 0) * 100);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <Text style={styles.eyebrow}>{year} · year to date</Text>
-          <Pressable onPress={toggle} hitSlop={8} style={styles.eyeBtn} accessibilityLabel={hidden ? 'Show amounts' : 'Hide amounts'}>
-            <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.ink} />
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <View style={s.headerRow}>
+          <Text style={s.eyebrow}>{year} · monthly biller · net-{profile.paymentTermsDays}</Text>
+          <Pressable onPress={toggle} hitSlop={8} accessibilityLabel={hidden ? 'Show amounts' : 'Hide amounts'}>
+            <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color={t.ink} />
           </Pressable>
         </View>
 
         {empty ? (
-          <View style={styles.emptyWrap}>
-            <Text style={styles.emptyTitle}>No days logged yet</Text>
-            <Text style={styles.emptyNote}>Log a day and your income, taxes, and state split show up here.</Text>
-            <Pressable style={styles.logBtn} onPress={() => router.push('/entry')}>
-              <Ionicons name="add" size={18} color="#fff" />
-              <Text style={styles.logBtnText}>Log your first day</Text>
+          <View style={s.emptyWrap}>
+            <Text style={s.emptyTitle}>nothing logged yet</Text>
+            <Text style={s.emptyNote}>Log a day and your income, tax hold, and state split build from there.</Text>
+            <Pressable style={s.primaryBtn} onPress={() => router.push('/entry')}>
+              <Text style={s.primaryText}>log first day · {money(profile.defaultDayRate)}</Text>
             </Pressable>
           </View>
         ) : (
           <>
-            <Text style={styles.label}>Income earned</Text>
-            <AmountText style={styles.hero}>{money(inc)}</AmountText>
-
-            <View style={styles.cardRow}>
-              <View style={styles.statCard}>
-                <Text style={styles.cardLabel}>Set aside · tax</Text>
-                <AmountText style={[styles.cardValue, { color: colors.danger }]}>{money(setAside)}</AmountText>
-              </View>
-              <View style={styles.statCard}>
-                <Text style={styles.cardLabel}>Net so far</Text>
-                <AmountText style={styles.cardValue}>{money(net)}</AmountText>
-              </View>
+            <View style={s.heroRow}>
+              <AmountText style={s.hero}>{money(net)}</AmountText>
+              <Text style={s.heroSub}>net after {pctHeld}% held</Text>
             </View>
 
-            {states.length > 0 && (
-              <Pressable style={styles.stateCard} onPress={() => router.push('/states')}>
-                <View style={styles.stateHeader}>
-                  <Text style={styles.stateTitle}>Income by state</Text>
-                  <View style={styles.stateLink}>
-                    <Text style={styles.linkText}>{states.length} states</Text>
-                    <Ionicons name="chevron-forward" size={13} color={colors.accent} />
-                  </View>
-                </View>
-                <View style={styles.bar}>
-                  {states.map((s, i) => (
-                    <View key={s.state} style={{ flex: Math.max(s.pct, 1), backgroundColor: stateColor(s.state, i) }} />
-                  ))}
-                </View>
-                <View style={styles.legendRow}>
-                  {states.map((s, i) => (
-                    <View key={s.state} style={styles.legendItem}>
-                      <View style={[styles.dot, { backgroundColor: stateColor(s.state, i) }]} />
-                      <Text style={styles.legendText}>{s.state} {Math.round(s.pct)}%</Text>
-                    </View>
-                  ))}
-                </View>
-              </Pressable>
-            )}
-
-            <View style={styles.miniRow}>
-              <View style={styles.mini}><Text style={styles.miniLabel}>Days out</Text><Text style={styles.miniValue}>{out}</Text></View>
-              <View style={styles.mini}><Text style={styles.miniLabel}>Per diem dy</Text><Text style={styles.miniValue}>{pd}</Text></View>
-              <View style={styles.mini}><Text style={styles.miniLabel}>Mileage</Text><Text style={styles.miniValue}>{num(miles)}</Text></View>
-            </View>
-
-            <Pressable style={styles.logBtn} onPress={() => router.push('/entry')}>
-              <Ionicons name="add" size={18} color="#fff" />
-              <Text style={styles.logBtnText}>Log today</Text>
-            </Pressable>
+            <Row s={s} k="income" v={<AmountText style={s.v}>{money(inc)}</AmountText>} />
+            <Row s={s} k="tax set-aside" v={<AmountText style={[s.v, { color: t.danger }]}>{money(setAside)}</AmountText>} />
+            <Row s={s} k={`per diem · ${pdDays}d`} v={<AmountText style={s.v}>{money(pdTotal)}</AmountText>} />
+            <Row
+              s={s}
+              k="reimbursable open"
+              v={<AmountText style={[s.v, { color: t.accent }]}>{money(reimbOpen)}</AmountText>}
+              onPress={() => router.push('/expenses')}
+            />
+            <Row s={s} k="days out" v={<Text style={s.v}>{out}</Text>} />
+            <Row s={s} k="mileage" v={<Text style={s.v}>{num(miles)} mi</Text>} />
 
             {nextCert && (
-              <Pressable style={styles.certRow} onPress={() => router.push('/certs')}>
-                <MaterialCommunityIcons name="shield-alert-outline" size={16} color={colors.danger} />
-                <Text style={styles.certText}>
-                  {nextCert.c.name} {nextCert.days < 0 ? 'expired' : `· ${nextCert.days} days`}
-                </Text>
+              <Row
+                s={s}
+                k={nextCert.c.name.toLowerCase()}
+                v={<Text style={[s.v, { color: t.danger }]}>{nextCert.days < 0 ? 'expired' : `${nextCert.days}d`}</Text>}
+                kColor={t.danger}
+                onPress={() => router.push('/certs')}
+              />
+            )}
+
+            {states.length > 0 && (
+              <Pressable style={s.stateBlock} onPress={() => router.push('/states')}>
+                <View style={s.bar}>
+                  {states.map((st, i) => (
+                    <View key={st.state} style={{ flex: Math.max(st.pct, 1), backgroundColor: stateColor(st.state, i, t) }} />
+                  ))}
+                </View>
+                <View style={s.legendRow}>
+                  <Text style={s.legendText}>
+                    {states.map((st) => `${st.state.toLowerCase()} ${Math.round(st.pct)}%`).join(' · ')}
+                  </Text>
+                  <Text style={s.legendLink}>states →</Text>
+                </View>
               </Pressable>
             )}
+
+            <View style={s.actions}>
+              <Pressable style={s.primaryBtn} onPress={() => router.push('/entry')}>
+                <Text style={s.primaryText}>log {money(profile.defaultDayRate)}</Text>
+              </Pressable>
+              <Pressable style={s.secondaryBtn} onPress={() => router.push('/expenses')}>
+                <Text style={s.secondaryText}>expense</Text>
+              </Pressable>
+              <Pressable style={s.secondaryBtn} onPress={() => router.push('/report')}>
+                <Text style={s.secondaryText}>report</Text>
+              </Pressable>
+            </View>
           </>
         )}
       </ScrollView>
@@ -117,45 +120,53 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 24 },
+function Row({
+  s, k, v, kColor, onPress,
+}: {
+  s: ReturnType<typeof makeStyles>;
+  k: string;
+  v: React.ReactNode;
+  kColor?: string;
+  onPress?: () => void;
+}) {
+  const inner = (
+    <View style={s.row}>
+      <Text style={[s.k, kColor ? { color: kColor } : null]}>{k}</Text>
+      {v}
+    </View>
+  );
+  return onPress ? <Pressable onPress={onPress}>{inner}</Pressable> : inner;
+}
 
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  eyebrow: { fontSize: 13, color: colors.muted },
-  eyeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+const makeStyles = (t: AppColors) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.bg },
+    content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
 
-  emptyWrap: { paddingVertical: 40, alignItems: 'flex-start' },
-  emptyTitle: { fontSize: 18, fontWeight: '500', color: colors.ink, marginBottom: 6 },
-  emptyNote: { fontSize: 14, color: colors.muted, lineHeight: 20, marginBottom: 20 },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 4 },
+    eyebrow: { fontSize: 12, color: t.faint },
 
-  label: { fontSize: 13, color: colors.muted },
-  hero: { fontSize: 34, fontWeight: '500', color: colors.ink, lineHeight: 40, marginBottom: 14 },
+    emptyWrap: { paddingVertical: 40 },
+    emptyTitle: { fontSize: 17, fontWeight: '500', color: t.ink, marginBottom: 6 },
+    emptyNote: { fontSize: 13, color: t.muted, lineHeight: 19, marginBottom: 22 },
 
-  cardRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
-  statCard: { flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 14 },
-  cardLabel: { fontSize: 11, color: colors.muted, marginBottom: 2 },
-  cardValue: { fontSize: 18, fontWeight: '500', color: colors.ink },
+    heroRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline },
+    hero: { fontSize: 32, fontWeight: '500', color: t.ink, letterSpacing: -0.5 },
+    heroSub: { fontSize: 12, color: t.muted, paddingBottom: 5 },
 
-  stateCard: { borderWidth: 0.5, borderColor: colors.border, borderRadius: 14, padding: 14, marginBottom: 16 },
-  stateHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  stateTitle: { fontSize: 13, fontWeight: '500', color: colors.ink },
-  stateLink: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  linkText: { fontSize: 11, color: colors.accent },
-  bar: { flexDirection: 'row', gap: 3, height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 8 },
-  legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  dot: { width: 8, height: 8, borderRadius: 2 },
-  legendText: { fontSize: 11, color: colors.muted },
+    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline2 },
+    k: { fontSize: 13, color: t.muted },
+    v: { fontSize: 13, color: t.ink },
 
-  miniRow: { flexDirection: 'row', marginVertical: 18 },
-  mini: { flex: 1 },
-  miniLabel: { fontSize: 11, color: colors.muted },
-  miniValue: { fontSize: 16, fontWeight: '500', color: colors.ink },
+    stateBlock: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline2 },
+    bar: { flexDirection: 'row', gap: 2, height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 7 },
+    legendRow: { flexDirection: 'row', justifyContent: 'space-between' },
+    legendText: { fontSize: 11, color: t.muted },
+    legendLink: { fontSize: 11, color: t.faint },
 
-  logBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.ink, borderRadius: 14, paddingVertical: 15, marginBottom: 12 },
-  logBtnText: { color: '#fff', fontSize: 15, fontWeight: '500' },
-
-  certRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  certText: { fontSize: 12, color: colors.danger },
-});
+    actions: { flexDirection: 'row', gap: 8, marginTop: 18 },
+    primaryBtn: { flex: 1.4, backgroundColor: t.ink, borderRadius: 8, paddingVertical: 13, alignItems: 'center' },
+    primaryText: { color: t.onInk, fontSize: 13, fontWeight: '500' },
+    secondaryBtn: { flex: 1, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, paddingVertical: 13, alignItems: 'center' },
+    secondaryText: { color: t.muted, fontSize: 13 },
+  });

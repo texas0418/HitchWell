@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { colors } from '../theme/colors';
+import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { ClientField } from '../components/ClientField';
 import { DateField } from '../components/DateField';
+import { NumField } from '../components/NumField';
+import { StatePicker } from '../components/StatePicker';
 import { useStore, DayType } from '../lib/store';
 import { firstLastMie, mieForLocation, findArea } from '../lib/perdiem';
-import { todayISO } from '../lib/format';
+import { todayISO, addDays, longDate } from '../lib/format';
 
 const TYPES: { key: DayType; label: string }[] = [
   { key: 'worked', label: 'Worked' },
@@ -16,16 +18,21 @@ const TYPES: { key: DayType; label: string }[] = [
   { key: 'off', label: 'Off' },
 ];
 
-const STATES = ['TX', 'NM', 'OK', 'ND', 'CO', 'LA', 'PA', 'WV', 'WY', 'NV', 'CA', 'MT'];
-
 export default function EntryScreen() {
+  const t = useTheme();
+  const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; date?: string }>();
   const { dayEntries, profile, addDayEntry, updateDayEntry, removeDayEntry } = useStore();
 
   const existing = useMemo(() => dayEntries.find((d) => d.id === params.id), [dayEntries, params.id]);
 
-  const [date, setDate] = useState(existing?.date ?? todayISO());
+  // Range mode logs one entry per day across [date, endDate]. Only for new
+  // entries; edits are always single-day so each day stays individually
+  // editable and deletable after a bulk log.
+  const [range, setRange] = useState(false);
+  const [date, setDate] = useState(existing?.date ?? params.date ?? todayISO());
+  const [endDate, setEndDate] = useState(existing?.date ?? params.date ?? todayISO());
   const [type, setType] = useState<DayType>(existing?.type ?? 'worked');
   const [rate, setRate] = useState(String(existing?.rate ?? profile.defaultDayRate));
   const [state, setState] = useState(existing?.state ?? profile.homeState);
@@ -35,21 +42,52 @@ export default function EntryScreen() {
   const [perDiemAmt, setPerDiemAmt] = useState(String(existing?.perDiemAmount ?? profile.perDiemMie));
 
   const isOff = type === 'off';
-  const stateOptions = Array.from(new Set([profile.homeState, ...STATES])).filter(Boolean);
+
+  const buildPayload = (d: string) => ({
+    date: d,
+    type,
+    rate: isOff ? 0 : Number(rate) || 0,
+    state: isOff ? '' : state,
+    location: location.trim(),
+    client: client.trim() || undefined,
+    perDiem: isOff ? false : perDiem,
+    perDiemAmount: !isOff && perDiem ? Number(perDiemAmt) || 0 : undefined,
+  });
 
   const save = () => {
-    const payload = {
-      date,
-      type,
-      rate: isOff ? 0 : Number(rate) || 0,
-      state: isOff ? '' : state,
-      location: location.trim(),
-      client: client.trim() || undefined,
-      perDiem: isOff ? false : perDiem,
-      perDiemAmount: !isOff && perDiem ? Number(perDiemAmt) || 0 : undefined,
-    };
-    if (existing) updateDayEntry(existing.id, payload);
-    else addDayEntry(payload);
+    if (existing) {
+      updateDayEntry(existing.id, buildPayload(date));
+      router.back();
+      return;
+    }
+    if (!range) {
+      addDayEntry(buildPayload(date));
+      router.back();
+      return;
+    }
+    // Range save: one entry per day, skipping dates already logged.
+    if (endDate < date) {
+      Alert.alert('Check the dates', 'The end date is before the start date.');
+      return;
+    }
+    const logged = new Set(dayEntries.map((e) => e.date));
+    let added = 0;
+    let skipped = 0;
+    let d = date;
+    let guard = 0;
+    while (d <= endDate && guard < 120) {
+      if (logged.has(d)) skipped++;
+      else {
+        addDayEntry(buildPayload(d));
+        added++;
+      }
+      d = addDays(d, 1);
+      guard++;
+    }
+    Alert.alert(
+      'Days logged',
+      `Logged ${added} day${added === 1 ? '' : 's'}${skipped ? `, skipped ${skipped} already logged` : ''}. Each day can be edited or deleted on the calendar.`
+    );
     router.back();
   };
 
@@ -58,71 +96,87 @@ export default function EntryScreen() {
     router.back();
   };
 
-  return (
-    <ScrollView style={styles.safe} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={styles.label}>Date</Text>
-      <DateField value={date} onChange={setDate} />
+  const rangeDays = useMemo(() => {
+    if (!range || endDate < date) return 0;
+    let n = 0;
+    let d = date;
+    while (d <= endDate && n < 120) {
+      n++;
+      d = addDays(d, 1);
+    }
+    return n;
+  }, [range, date, endDate]);
 
-      <Text style={styles.label}>Type</Text>
-      <View style={styles.chipRow}>
-        {TYPES.map((t) => (
-          <Chip key={t.key} label={t.label} selected={type === t.key} onPress={() => setType(t.key)} />
+  return (
+    <ScrollView style={s.safe} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      {!existing && (
+        <View style={s.modeRow}>
+          <Pressable style={[s.modeBtn, !range && s.modeOn]} onPress={() => setRange(false)}>
+            <Text style={[s.modeText, !range && s.modeTextOn]}>single day</Text>
+          </Pressable>
+          <Pressable style={[s.modeBtn, range && s.modeOn]} onPress={() => setRange(true)}>
+            <Text style={[s.modeText, range && s.modeTextOn]}>date range</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <Text style={s.label}>{range && !existing ? 'first day' : 'date'}</Text>
+      <DateField value={date} onChange={(d) => { setDate(d); if (endDate < d) setEndDate(d); }} />
+
+      {range && !existing && (
+        <>
+          <Text style={s.label}>last day</Text>
+          <DateField value={endDate} onChange={setEndDate} />
+          {rangeDays > 1 && (
+            <Text style={s.rangeNote}>
+              {rangeDays} days · {longDate(date)} to {longDate(endDate)} · same info applied to each, already-logged days skipped
+            </Text>
+          )}
+        </>
+      )}
+
+      <Text style={s.label}>type</Text>
+      <View style={s.chipRow}>
+        {TYPES.map((ty) => (
+          <Chip key={ty.key} label={ty.label} selected={type === ty.key} onPress={() => setType(ty.key)} />
         ))}
       </View>
 
       {!isOff && (
         <>
-          <Text style={styles.label}>Rate ($)</Text>
-          <TextInput
-            style={styles.input}
-            value={rate}
-            onChangeText={setRate}
-            keyboardType="number-pad"
-            placeholder="0"
-            placeholderTextColor={colors.faint}
-          />
+          <Text style={s.label}>rate ($)</Text>
+          <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" placeholder="0" />
 
-          <Text style={styles.label}>State</Text>
-          <View style={styles.chipRow}>
-            {stateOptions.map((s) => (
-              <Chip key={s} label={s} selected={state === s} onPress={() => setState(s)} />
-            ))}
-          </View>
+          <Text style={s.label}>state</Text>
+          <StatePicker value={state} onChange={setState} pinned={profile.homeState} />
 
-          <Text style={styles.label}>Location</Text>
+          <Text style={s.label}>location</Text>
           <TextInput
-            style={styles.input}
+            style={s.input}
             value={location}
             onChangeText={setLocation}
             placeholder="e.g. Midland, TX"
-            placeholderTextColor={colors.faint}
+            placeholderTextColor={t.faint}
           />
 
-          <Text style={styles.label}>Client / staffing house</Text>
+          <Text style={s.label}>client / staffing house</Text>
           <ClientField value={client} onChange={setClient} />
 
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Per diem day</Text>
-            <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ true: colors.accent }} />
+          <View style={s.switchRow}>
+            <Text style={s.switchLabel}>per diem {range && rangeDays > 1 ? 'days' : 'day'}</Text>
+            <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ true: t.accent }} />
           </View>
 
           {perDiem && (
-            <View style={styles.perDiemBox}>
-              <Text style={styles.label}>M&IE amount ($)</Text>
-              <TextInput
-                style={styles.input}
-                value={perDiemAmt}
-                onChangeText={setPerDiemAmt}
-                keyboardType="decimal-pad"
-                placeholder="0"
-                placeholderTextColor={colors.faint}
-              />
+            <View style={s.perDiemBox}>
+              <Text style={s.label}>M&IE amount ($/day)</Text>
+              <NumField value={perDiemAmt} onChangeText={setPerDiemAmt} placeholder="0" />
               {(() => {
                 const areaMie = mieForLocation(state, location, profile.perDiemMie);
                 const area = findArea(state, location);
                 return (
                   <>
-                    <View style={styles.chipRow}>
+                    <View style={[s.chipRow, { marginTop: 10 }]}>
                       <Chip
                         label={`Full $${areaMie}`}
                         selected={Number(perDiemAmt) === areaMie}
@@ -134,10 +188,13 @@ export default function EntryScreen() {
                         onPress={() => setPerDiemAmt(String(firstLastMie(areaMie)))}
                       />
                     </View>
-                    <Text style={styles.perDiemNote}>
+                    <Text style={s.perDiemNote}>
                       {area
-                        ? `GSA rate for ${area.city}: $${areaMie} M&IE. Use 75% for first and last travel days.`
-                        : `Standard GSA M&IE is $${profile.perDiemMie}. Use 75% for first and last travel days.`}
+                        ? `GSA rate for ${area.city}: $${areaMie} M&IE.`
+                        : `Standard GSA M&IE is $${profile.perDiemMie}.`}
+                      {range && rangeDays > 1
+                        ? ' Applied to every day in the range; log travel days separately at 75%.'
+                        : ' Use 75% for first and last travel days.'}
                     </Text>
                   </>
                 );
@@ -147,47 +204,51 @@ export default function EntryScreen() {
         </>
       )}
 
-      <Pressable style={styles.saveBtn} onPress={save}>
-        <Text style={styles.saveText}>{existing ? 'Save changes' : 'Save day'}</Text>
+      <Pressable style={s.saveBtn} onPress={save}>
+        <Text style={s.saveText}>
+          {existing ? 'save changes' : range && rangeDays > 1 ? `log ${rangeDays} days` : 'save day'}
+        </Text>
       </Pressable>
 
       {existing && (
-        <Pressable style={styles.delBtn} onPress={del}>
-          <Text style={styles.delText}>Delete</Text>
+        <Pressable style={s.delBtn} onPress={del}>
+          <Text style={s.delText}>delete this day</Text>
         </Pressable>
       )}
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 18, paddingBottom: 40 },
+const makeStyles = (t: AppColors) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.bg },
+    content: { padding: 16, paddingBottom: 40 },
 
-  label: { fontSize: 12, color: colors.muted, marginTop: 18, marginBottom: 8 },
+    modeRow: { flexDirection: 'row', borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, overflow: 'hidden' },
+    modeBtn: { flex: 1, paddingVertical: 10, alignItems: 'center' },
+    modeOn: { backgroundColor: t.ink },
+    modeText: { fontSize: 13, color: t.muted },
+    modeTextOn: { color: t.onInk, fontWeight: '500' },
 
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  stepBtn: { width: 40, height: 40, borderRadius: 10, borderWidth: 0.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  dateText: { fontSize: 16, color: colors.ink, fontWeight: '500', minWidth: 130, textAlign: 'center' },
-  todayBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 999, backgroundColor: colors.surface },
-  todayText: { fontSize: 12, color: colors.accent },
+    label: { fontSize: 12, color: t.muted, marginTop: 18, marginBottom: 8 },
+    rangeNote: { fontSize: 11, color: t.faint, marginTop: 8 },
 
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 
-  input: {
-    height: 46, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10,
-    paddingHorizontal: 14, fontSize: 16, color: colors.ink, backgroundColor: colors.bg,
-  },
+    input: {
+      height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8,
+      paddingHorizontal: 13, fontSize: 16, color: t.ink, backgroundColor: t.bg,
+    },
 
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 },
-  switchLabel: { fontSize: 15, color: colors.ink },
+    switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 },
+    switchLabel: { fontSize: 14, color: t.ink },
 
-  perDiemBox: { marginTop: 6, paddingTop: 4 },
-  perDiemNote: { fontSize: 11, color: colors.muted, marginTop: 8 },
+    perDiemBox: { marginTop: 6, paddingTop: 4 },
+    perDiemNote: { fontSize: 11, color: t.muted, marginTop: 8 },
 
-  saveBtn: { backgroundColor: colors.ink, borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 28 },
-  saveText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+    saveBtn: { backgroundColor: t.ink, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 28 },
+    saveText: { color: t.onInk, fontSize: 14, fontWeight: '500' },
 
-  delBtn: { paddingVertical: 14, alignItems: 'center', marginTop: 6 },
-  delText: { color: colors.danger, fontSize: 14 },
-});
+    delBtn: { paddingVertical: 14, alignItems: 'center', marginTop: 6 },
+    delText: { color: t.danger, fontSize: 13 },
+  });

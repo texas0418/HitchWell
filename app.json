@@ -5,27 +5,20 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "hitchwell",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.page4films.hitchwell"
     },
     "android": {
-      "package": "com.page4films.hitchwell",
-      "permissions": [
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "package": "com.page4films.hitchwell"
     },
     "plugins": [
       "expo-router",
       [
         "expo-local-authentication",
-        {
-          "faceIDPermission": "Reveal your income and expense amounts."
-        }
+        { "faceIDPermission": "Reveal your income and expense amounts." }
       ],
       [
         "expo-image-picker",
@@ -33,18 +26,10 @@
           "photosPermission": "HitchWell attaches receipt photos to your expenses.",
           "cameraPermission": "HitchWell uses the camera to capture receipt photos."
         }
-      ],
-      "@react-native-community/datetimepicker",
-      "expo-sharing"
+      ]
     ],
     "experiments": {
       "typedRoutes": false
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "1c8b38fb-be03-4075-8716-10c5188e39e6"
-      }
     }
   }
 }

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { colors } from '../theme/colors';
+import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
+import { NumField } from '../components/NumField';
+import { StatePicker } from '../components/StatePicker';
 import { useStore, PayPeriod, PAY_PERIODS } from '../lib/store';
 
-const STATES = ['TX', 'NM', 'OK', 'ND', 'CO', 'LA', 'PA', 'WV', 'WY', 'NV', 'CA', 'MT'];
-
 export default function Onboarding() {
+  const t = useTheme();
+  const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
   const { setProfile, setOnboarded } = useStore();
 
@@ -23,46 +25,42 @@ export default function Onboarding() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.brand}>HitchWell</Text>
-        <Text style={styles.lead}>A few defaults so logging a day takes one tap. You can change all of these later in Settings.</Text>
+    <SafeAreaView style={s.safe}>
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+        <Text style={s.brand}>hitchwell</Text>
+        <Text style={s.lead}>A few defaults so logging a day takes one tap. All of it can change later in settings.</Text>
 
-        <Text style={styles.label}>Your usual day rate ($)</Text>
-        <TextInput style={styles.input} value={rate} onChangeText={setRate} keyboardType="number-pad" />
+        <Text style={s.label}>your usual day rate ($)</Text>
+        <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
 
-        <Text style={styles.label}>Home state</Text>
-        <View style={styles.chipRow}>
-          {Array.from(new Set([homeState, ...STATES])).map((s) => (
-            <Chip key={s} label={s} selected={homeState === s} onPress={() => setHomeState(s)} />
-          ))}
-        </View>
+        <Text style={s.label}>home state</Text>
+        <StatePicker value={homeState} onChange={setHomeState} />
 
-        <Text style={styles.label}>Pay period</Text>
-        <View style={styles.chipRow}>
+        <Text style={s.label}>pay period</Text>
+        <View style={s.chipRow}>
           {PAY_PERIODS.map((p) => (
             <Chip key={p.key} label={p.label} selected={payPeriod === p.key} onPress={() => setPayPeriod(p.key)} />
           ))}
         </View>
-        <Text style={styles.note}>This sets how your expense reports group hours, mileage, and receipts.</Text>
+        <Text style={s.note}>This sets how your expense reports group hours, mileage, and receipts.</Text>
 
-        <Pressable style={styles.btn} onPress={start}>
-          <Text style={styles.btnText}>Get started</Text>
+        <Pressable style={s.btn} onPress={start}>
+          <Text style={s.btnText}>get started</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 22, paddingTop: 40, paddingBottom: 40 },
-  brand: { fontSize: 28, fontWeight: '500', color: colors.ink },
-  lead: { fontSize: 14, color: colors.muted, lineHeight: 20, marginTop: 8, marginBottom: 8 },
-  label: { fontSize: 12, color: colors.muted, marginTop: 22, marginBottom: 8 },
-  input: { height: 46, borderWidth: 0.5, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 14, fontSize: 16, color: colors.ink },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  note: { fontSize: 11, color: colors.muted, marginTop: 8 },
-  btn: { backgroundColor: colors.ink, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 34 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '500' },
-});
+const makeStyles = (t: AppColors) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.bg },
+    content: { padding: 20, paddingTop: 40, paddingBottom: 40 },
+    brand: { fontSize: 26, fontWeight: '500', color: t.ink },
+    lead: { fontSize: 13, color: t.muted, lineHeight: 19, marginTop: 8, marginBottom: 8 },
+    label: { fontSize: 12, color: t.muted, marginTop: 22, marginBottom: 8 },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    note: { fontSize: 11, color: t.faint, marginTop: 8 },
+    btn: { backgroundColor: t.ink, borderRadius: 8, paddingVertical: 15, alignItems: 'center', marginTop: 34 },
+    btnText: { color: t.onInk, fontSize: 15, fontWeight: '500' },
+  });

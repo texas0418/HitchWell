@@ -53,7 +53,7 @@ theme/colors.ts
 ## Install dependencies
 
 ```bash
-npx expo install expo-blur expo-local-authentication @react-native-async-storage/async-storage @react-native-community/datetimepicker expo-print expo-sharing expo-image-picker expo-file-system expo-status-bar react-native-safe-area-context
+npx expo install expo-blur expo-local-authentication @react-native-async-storage/async-storage @react-native-community/datetimepicker expo-print expo-sharing expo-image-picker expo-file-system expo-notifications expo-status-bar react-native-safe-area-context
 npm install zustand
 ```
 

@@ -2,8 +2,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 // Receipts are stored as files in the app's document directory. Only the file
 // path is kept on the expense. Photos must never go in the persisted store,
-// which would overflow AsyncStorage. If a future SDK moves these calls, this
-// is the one file to update (the import may become 'expo-file-system/legacy').
+// which would overflow AsyncStorage. The /legacy import is required on
+// Expo SDK 54+, where these functions moved out of the main entry point.
 
 const DIR = FileSystem.documentDirectory + 'receipts/';
 

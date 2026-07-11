@@ -1,9 +1,10 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../theme/colors';
+import { useTheme } from '../../theme/colors';
 import { useStore, useHydrated } from '../../lib/store';
 
 export default function TabsLayout() {
+  const t = useTheme();
   const hydrated = useHydrated();
   const onboarded = useStore((s) => s.onboarded);
 
@@ -14,9 +15,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.faint,
-        tabBarStyle: { borderTopColor: colors.hairline, backgroundColor: colors.bg },
+        tabBarActiveTintColor: t.ink,
+        tabBarInactiveTintColor: t.faint,
+        tabBarStyle: { borderTopColor: t.hairline, backgroundColor: t.bg },
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >
@@ -25,8 +26,8 @@ export default function TabsLayout() {
         options={{ title: 'Money', tabBarIcon: ({ color, size }) => <Ionicons name="cash-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="logbook"
-        options={{ title: 'Log', tabBarIcon: ({ color, size }) => <Ionicons name="list-outline" size={size} color={color} /> }}
+        name="calendar"
+        options={{ title: 'Calendar', tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} /> }}
       />
       <Tabs.Screen
         name="states"
