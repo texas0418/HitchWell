@@ -27,16 +27,16 @@ export default function Onboarding() {
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-        <Text style={s.brand}>hitchwell</Text>
+        <Text style={s.brand}>HitchWell</Text>
         <Text style={s.lead}>A few defaults so logging a day takes one tap. All of it can change later in settings.</Text>
 
-        <Text style={s.label}>your usual day rate ($)</Text>
+        <Text style={s.label}>Your usual day rate ($)</Text>
         <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
 
-        <Text style={s.label}>home state</Text>
+        <Text style={s.label}>Home state</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
 
-        <Text style={s.label}>pay period</Text>
+        <Text style={s.label}>Pay period</Text>
         <View style={s.chipRow}>
           {PAY_PERIODS.map((p) => (
             <Chip key={p.key} label={p.label} selected={payPeriod === p.key} onPress={() => setPayPeriod(p.key)} />
@@ -45,7 +45,7 @@ export default function Onboarding() {
         <Text style={s.note}>This sets how your expense reports group hours, mileage, and receipts.</Text>
 
         <Pressable style={s.btn} onPress={start}>
-          <Text style={s.btnText}>get started</Text>
+          <Text style={s.btnText}>Get started</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

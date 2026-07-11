@@ -33,7 +33,7 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: t.bg },
           }}
         >
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(tabs)" options={{ title: 'Back' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="entry" options={{ presentation: 'modal', headerShown: true, title: 'Log days' }} />
           <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly report' }} />

@@ -78,13 +78,13 @@ export function StatePicker({
           </View>
           <ScrollView>
             <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
-              oilfield states
+              Oilfield states
             </Text>
             {Array.from(new Set([...(pinned ? [pinned] : []), ...OILFIELD_STATES])).map((c) => (
               <RowItem key={c} code={c} />
             ))}
             <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 }}>
-              all states
+              All states
             </Text>
             {rest.map((c) => (
               <RowItem key={c} code={c} />

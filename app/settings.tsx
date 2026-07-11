@@ -61,16 +61,16 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-        <Text style={s.label}>name</Text>
+        <Text style={s.label}>Name</Text>
         <TextInput style={s.input} value={name} onChangeText={setName} placeholder="optional" placeholderTextColor={t.faint} />
 
-        <Text style={s.label}>default day rate ($)</Text>
+        <Text style={s.label}>Default day rate ($)</Text>
         <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
 
-        <Text style={s.label}>travel day rate ($)</Text>
+        <Text style={s.label}>Travel day rate ($)</Text>
         <NumField value={travelRate} onChangeText={setTravelRate} keyboardType="number-pad" placeholder="same as day rate" />
 
-        <Text style={s.label}>standby day rate ($)</Text>
+        <Text style={s.label}>Standby day rate ($)</Text>
         <NumField value={standbyRate} onChangeText={setStandbyRate} keyboardType="number-pad" placeholder="same as day rate" />
         <Text style={s.note}>Leave blank to use your default day rate. The log sheet fills the rate by day type.</Text>
 
@@ -78,31 +78,31 @@ export default function SettingsScreen() {
         <NumField value={mileageRate} onChangeText={setMileageRate} />
         <Text style={s.note}>Verify the current rate with the IRS each tax year.</Text>
 
-        <Text style={s.label}>tax set-aside (%)</Text>
+        <Text style={s.label}>Tax set-aside (%)</Text>
         <NumField value={taxPct} onChangeText={setTaxPct} keyboardType="number-pad" />
         <Text style={s.note}>A flat planning estimate, not a tax calculation. Confirm with your CPA.</Text>
 
-        <Text style={s.label}>home state</Text>
+        <Text style={s.label}>Home state</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
 
-        <Text style={s.label}>pay period</Text>
+        <Text style={s.label}>Pay period</Text>
         <View style={s.chipRow}>
           {PAY_PERIODS.map((p) => (
             <Chip key={p.key} label={p.label} selected={payPeriod === p.key} onPress={() => setPayPeriod(p.key)} />
           ))}
         </View>
 
-        <Text style={s.label}>payment terms (days to get paid)</Text>
+        <Text style={s.label}>Payment terms (days to get paid)</Text>
         <NumField value={termsDays} onChangeText={setTermsDays} keyboardType="number-pad" />
         <Text style={s.note}>Days from billing to payment. Net-30 means 30.</Text>
 
-        <Text style={s.label}>per diem M&IE ($/day)</Text>
+        <Text style={s.label}>Per diem M&IE ($/day)</Text>
         <NumField value={perDiemMie} onChangeText={setPerDiemMie} />
         <Text style={s.note}>GSA FY2026 standard CONUS is $68. Higher-cost areas differ; check gsa.gov/perdiem.</Text>
 
-        <Pressable style={s.saveBtn} onPress={save}><Text style={s.saveText}>save</Text></Pressable>
+        <Pressable style={s.saveBtn} onPress={save}><Text style={s.saveText}>Save</Text></Pressable>
 
-        <Text style={s.sectionTitle}>clients</Text>
+        <Text style={s.sectionTitle}>Clients</Text>
         <Text style={s.note}>The list you pick from when logging days, expenses, and mileage. Reports group on these.</Text>
         {clients.length === 0 && <Text style={s.emptyClients}>No clients yet. Add one below or from any log screen.</Text>}
         {clients.map((c) => (
@@ -123,13 +123,13 @@ export default function SettingsScreen() {
             onSubmitEditing={addClientFromDraft}
             returnKeyType="done"
           />
-          <Pressable style={s.addClientBtn} onPress={addClientFromDraft}><Text style={s.saveText}>add</Text></Pressable>
+          <Pressable style={s.addClientBtn} onPress={addClientFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
         </View>
 
         <View style={s.devBox}>
-          <Text style={s.devTitle}>test data</Text>
-          <Pressable style={s.devBtn} onPress={() => loadSample()}><Text style={s.devBtnText}>load sample data</Text></Pressable>
-          <Pressable style={s.devBtn} onPress={confirmClear}><Text style={[s.devBtnText, { color: t.danger }]}>clear all data</Text></Pressable>
+          <Text style={s.devTitle}>Test data</Text>
+          <Pressable style={s.devBtn} onPress={() => loadSample()}><Text style={s.devBtnText}>Load sample data</Text></Pressable>
+          <Pressable style={s.devBtn} onPress={confirmClear}><Text style={[s.devBtnText, { color: t.danger }]}>Clear all data</Text></Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>

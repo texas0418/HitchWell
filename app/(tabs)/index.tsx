@@ -43,7 +43,7 @@ export default function HomeScreen() {
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.headerRow}>
-          <Text style={s.eyebrow}>{year} · monthly biller · net-{profile.paymentTermsDays}</Text>
+          <Text style={s.eyebrow}>{year} · Monthly biller · Net-{profile.paymentTermsDays}</Text>
           <Pressable onPress={toggle} hitSlop={8} accessibilityLabel={hidden ? 'Show amounts' : 'Hide amounts'}>
             <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color={t.ink} />
           </Pressable>
@@ -51,35 +51,35 @@ export default function HomeScreen() {
 
         {empty ? (
           <View style={s.emptyWrap}>
-            <Text style={s.emptyTitle}>nothing logged yet</Text>
+            <Text style={s.emptyTitle}>Nothing logged yet</Text>
             <Text style={s.emptyNote}>Log a day and your income, tax hold, and state split build from there.</Text>
             <Pressable style={s.primaryBtn} onPress={() => router.push('/entry')}>
-              <Text style={s.primaryText}>log first day · {money(profile.defaultDayRate)}</Text>
+              <Text style={s.primaryText}>Log first day · {money(profile.defaultDayRate)}</Text>
             </Pressable>
           </View>
         ) : (
           <>
             <View style={s.heroRow}>
               <AmountText style={s.hero}>{money(net)}</AmountText>
-              <Text style={s.heroSub}>net after {pctHeld}% held</Text>
+              <Text style={s.heroSub}>Net after {pctHeld}% held</Text>
             </View>
 
-            <Row s={s} k="income" v={<AmountText style={s.v}>{money(inc)}</AmountText>} />
-            <Row s={s} k="tax set-aside" v={<AmountText style={[s.v, { color: t.danger }]}>{money(setAside)}</AmountText>} />
-            <Row s={s} k={`per diem · ${pdDays}d`} v={<AmountText style={s.v}>{money(pdTotal)}</AmountText>} />
+            <Row s={s} k="Income" v={<AmountText style={s.v}>{money(inc)}</AmountText>} />
+            <Row s={s} k="Tax set-aside" v={<AmountText style={[s.v, { color: t.danger }]}>{money(setAside)}</AmountText>} />
+            <Row s={s} k={`Per diem · ${pdDays}d`} v={<AmountText style={s.v}>{money(pdTotal)}</AmountText>} />
             <Row
               s={s}
-              k="reimbursable open"
+              k="Reimbursable open"
               v={<AmountText style={[s.v, { color: t.accent }]}>{money(reimbOpen)}</AmountText>}
               onPress={() => router.push('/expenses')}
             />
-            <Row s={s} k="days out" v={<Text style={s.v}>{out}</Text>} />
-            <Row s={s} k="mileage" v={<Text style={s.v}>{num(miles)} mi</Text>} />
+            <Row s={s} k="Days out" v={<Text style={s.v}>{out}</Text>} />
+            <Row s={s} k="Mileage" v={<Text style={s.v}>{num(miles)} mi</Text>} />
 
             {nextCert && (
               <Row
                 s={s}
-                k={nextCert.c.name.toLowerCase()}
+                k={nextCert.c.name}
                 v={<Text style={[s.v, { color: t.danger }]}>{nextCert.days < 0 ? 'expired' : `${nextCert.days}d`}</Text>}
                 kColor={t.danger}
                 onPress={() => router.push('/certs')}
@@ -95,22 +95,22 @@ export default function HomeScreen() {
                 </View>
                 <View style={s.legendRow}>
                   <Text style={s.legendText}>
-                    {states.map((st) => `${st.state.toLowerCase()} ${Math.round(st.pct)}%`).join(' · ')}
+                    {states.map((st) => `${st.state} ${Math.round(st.pct)}%`).join(' · ')}
                   </Text>
-                  <Text style={s.legendLink}>states →</Text>
+                  <Text style={s.legendLink}>States →</Text>
                 </View>
               </Pressable>
             )}
 
             <View style={s.actions}>
               <Pressable style={s.primaryBtn} onPress={() => router.push('/entry')}>
-                <Text style={s.primaryText}>log {money(profile.defaultDayRate)}</Text>
+                <Text style={s.primaryText}>Log {money(profile.defaultDayRate)}</Text>
               </Pressable>
               <Pressable style={s.secondaryBtn} onPress={() => router.push('/expenses')}>
-                <Text style={s.secondaryText}>expense</Text>
+                <Text style={s.secondaryText}>Expense</Text>
               </Pressable>
               <Pressable style={s.secondaryBtn} onPress={() => router.push('/report')}>
-                <Text style={s.secondaryText}>report</Text>
+                <Text style={s.secondaryText}>Report</Text>
               </Pressable>
             </View>
           </>

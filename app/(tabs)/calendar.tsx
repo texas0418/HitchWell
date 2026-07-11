@@ -71,7 +71,7 @@ export default function CalendarScreen() {
   };
 
   const typeLabel = (e: DayEntry) =>
-    e.type === 'worked' ? 'worked' : e.type === 'travel' ? 'travel' : e.type === 'standby' ? 'standby' : 'off';
+    e.type === 'worked' ? 'Worked' : e.type === 'travel' ? 'Travel' : e.type === 'standby' ? 'Standby' : 'Off';
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -92,7 +92,7 @@ export default function CalendarScreen() {
         </View>
 
         <View style={s.weekRow}>
-          {['s', 'm', 't', 'w', 't', 'f', 's'].map((d, i) => (
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
             <Text key={i} style={s.weekDay}>{d}</Text>
           ))}
         </View>
@@ -116,14 +116,14 @@ export default function CalendarScreen() {
         </View>
 
         <View style={s.legend}>
-          <Legend t={t} color={t.success} label="worked" />
-          <Legend t={t} color={t.accent} label="travel" />
-          <Legend t={t} color={t.warn} label="standby" />
-          <Legend t={t} color={t.surface} label="off" outline />
+          <Legend t={t} color={t.success} label="Worked" />
+          <Legend t={t} color={t.accent} label="Travel" />
+          <Legend t={t} color={t.warn} label="Standby" />
+          <Legend t={t} color={t.surface} label="Off" outline />
         </View>
 
         {monthEntries.length === 0 ? (
-          <Text style={s.empty}>nothing logged this month · tap a day to log it</Text>
+          <Text style={s.empty}>Nothing logged this month · Tap a day to log it</Text>
         ) : (
           monthEntries.map((e) => (
             <Pressable key={e.id} style={s.row} onPress={() => router.push(`/entry?id=${e.id}`)}>

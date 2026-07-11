@@ -112,20 +112,20 @@ export default function EntryScreen() {
       {!existing && (
         <View style={s.modeRow}>
           <Pressable style={[s.modeBtn, !range && s.modeOn]} onPress={() => setRange(false)}>
-            <Text style={[s.modeText, !range && s.modeTextOn]}>single day</Text>
+            <Text style={[s.modeText, !range && s.modeTextOn]}>Single day</Text>
           </Pressable>
           <Pressable style={[s.modeBtn, range && s.modeOn]} onPress={() => setRange(true)}>
-            <Text style={[s.modeText, range && s.modeTextOn]}>date range</Text>
+            <Text style={[s.modeText, range && s.modeTextOn]}>Date range</Text>
           </Pressable>
         </View>
       )}
 
-      <Text style={s.label}>{range && !existing ? 'first day' : 'date'}</Text>
+      <Text style={s.label}>{range && !existing ? 'First day' : 'Date'}</Text>
       <DateField value={date} onChange={(d) => { setDate(d); if (endDate < d) setEndDate(d); }} />
 
       {range && !existing && (
         <>
-          <Text style={s.label}>last day</Text>
+          <Text style={s.label}>Last day</Text>
           <DateField value={endDate} onChange={setEndDate} />
           {rangeDays > 1 && (
             <Text style={s.rangeNote}>
@@ -135,7 +135,7 @@ export default function EntryScreen() {
         </>
       )}
 
-      <Text style={s.label}>type</Text>
+      <Text style={s.label}>Type</Text>
       <View style={s.chipRow}>
         {TYPES.map((ty) => (
           <Chip
@@ -155,13 +155,13 @@ export default function EntryScreen() {
 
       {!isOff && (
         <>
-          <Text style={s.label}>rate ($)</Text>
+          <Text style={s.label}>Rate ($)</Text>
           <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" placeholder="0" />
 
-          <Text style={s.label}>state</Text>
+          <Text style={s.label}>State</Text>
           <StatePicker value={state} onChange={setState} pinned={profile.homeState} />
 
-          <Text style={s.label}>location</Text>
+          <Text style={s.label}>Location</Text>
           <TextInput
             style={s.input}
             value={location}
@@ -170,11 +170,11 @@ export default function EntryScreen() {
             placeholderTextColor={t.faint}
           />
 
-          <Text style={s.label}>client / staffing house</Text>
+          <Text style={s.label}>Client / staffing house</Text>
           <ClientField value={client} onChange={setClient} />
 
           <View style={s.switchRow}>
-            <Text style={s.switchLabel}>per diem {range && rangeDays > 1 ? 'days' : 'day'}</Text>
+            <Text style={s.switchLabel}>Per diem {range && rangeDays > 1 ? 'days' : 'day'}</Text>
             <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ true: t.accent }} />
           </View>
 
@@ -217,13 +217,13 @@ export default function EntryScreen() {
 
       <Pressable style={s.saveBtn} onPress={save}>
         <Text style={s.saveText}>
-          {existing ? 'save changes' : range && rangeDays > 1 ? `log ${rangeDays} days` : 'save day'}
+          {existing ? 'Save changes' : range && rangeDays > 1 ? `Log ${rangeDays} days` : 'Save day'}
         </Text>
       </Pressable>
 
       {existing && (
         <Pressable style={s.delBtn} onPress={del}>
-          <Text style={s.delText}>delete this day</Text>
+          <Text style={s.delText}>Delete this day</Text>
         </Pressable>
       )}
     </ScrollView>
