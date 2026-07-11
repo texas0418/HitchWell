@@ -93,6 +93,9 @@ export type Profile = {
   perDiemMie: number;        // default daily M&IE (GSA FY2026 standard = 68)
   travelDayRate: number;     // 0 = same as defaultDayRate
   standbyDayRate: number;    // 0 = same as defaultDayRate
+  hitchOnDays: number;       // rotation days on (0 = schedule off)
+  hitchOffDays: number;      // rotation days off
+  hitchAnchor: string;       // ISO first day of any known hitch ('' = off)
 };
 
 export type Appearance = 'system' | 'light' | 'dark';
@@ -144,6 +147,9 @@ const defaultProfile: Profile = {
   perDiemMie: 68,
   travelDayRate: 0,
   standbyDayRate: 0,
+  hitchOnDays: 28,
+  hitchOffDays: 14,
+  hitchAnchor: '',
 };
 
 export const useStore = create<State>()(
@@ -224,7 +230,7 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 8,
+      version: 9,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;

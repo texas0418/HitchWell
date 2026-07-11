@@ -8,7 +8,8 @@ import { usePrivacy } from '../../context/PrivacyContext';
 import { AmountText } from '../../components/AmountText';
 import { useStore } from '../../lib/store';
 import * as calc from '../../lib/calc';
-import { money, num } from '../../lib/format';
+import { hitchStatus, remainingOnDays, hitchEnabled } from '../../lib/hitch';
+import { money, num, longDate } from '../../lib/format';
 
 // Money home — terminal/utility style. Flat rows, hairline dividers,
 // one hero number, everything else dense and left-aligned.
@@ -30,6 +31,11 @@ export default function HomeScreen() {
   const pdDays = calc.perDiemDays(dayEntries, year);
   const reimbOpen = calc.reimbursableTotal(expenses, year);
   const miles = calc.totalMileage(mileage, year);
+
+  const hs = hitchStatus(profile);
+  const projected = hitchEnabled(profile)
+    ? inc + remainingOnDays(profile, year) * (profile.defaultDayRate || 0)
+    : 0;
 
   const nextCert = [...certs]
     .map((c) => ({ c, ...calc.certStatus(c) }))
@@ -75,6 +81,17 @@ export default function HomeScreen() {
             />
             <Row s={s} k="Days Out" v={<Text style={s.v}>{out}</Text>} />
             <Row s={s} k="Mileage" v={<Text style={s.v}>{num(miles)} mi</Text>} />
+
+            {hs && (
+              <Row
+                s={s}
+                k={hs.phase === 'on' ? `Hitch · Day ${hs.dayInPhase} of ${hs.phaseLength}` : `Off · Day ${hs.dayInPhase} of ${hs.phaseLength}`}
+                v={<Text style={s.v}>{hs.nextChangeLabel} {longDate(hs.nextChange)}</Text>}
+              />
+            )}
+            {projected > 0 && (
+              <Row s={s} k="Projected Year (est.)" v={<AmountText style={s.v}>{money(projected)}</AmountText>} />
+            )}
 
             {nextCert && (
               <Row

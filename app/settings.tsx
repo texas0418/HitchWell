@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { NumField } from '../components/NumField';
+import { DateField } from '../components/DateField';
 import { StatePicker } from '../components/StatePicker';
 import { useStore, PayPeriod, PAY_PERIODS, Appearance } from '../lib/store';
 import { clearAllReceipts } from '../lib/receipts';
@@ -26,6 +27,9 @@ export default function SettingsScreen() {
   const [payPeriod, setPayPeriod] = useState<PayPeriod>(profile.payPeriod);
   const [termsDays, setTermsDays] = useState(String(profile.paymentTermsDays));
   const [perDiemMie, setPerDiemMie] = useState(String(profile.perDiemMie));
+  const [hitchOn, setHitchOn] = useState(String(profile.hitchOnDays || ''));
+  const [hitchOff, setHitchOff] = useState(String(profile.hitchOffDays || ''));
+  const [hitchAnchor, setHitchAnchor] = useState(profile.hitchAnchor);
   const [clientDraft, setClientDraft] = useState('');
 
   const addClientFromDraft = () => {
@@ -47,6 +51,9 @@ export default function SettingsScreen() {
       payPeriod,
       paymentTermsDays: Number(termsDays) || 0,
       perDiemMie: Number(perDiemMie) || 0,
+      hitchOnDays: Number(hitchOn) || 0,
+      hitchOffDays: Number(hitchOff) || 0,
+      hitchAnchor,
     });
     router.back();
   };
@@ -113,6 +120,27 @@ export default function SettingsScreen() {
         <NumField value={perDiemMie} onChangeText={setPerDiemMie} />
         <Text style={s.note}>GSA FY2026 standard CONUS is $68. Higher-cost areas differ; check gsa.gov/perdiem.</Text>
 
+        <Text style={s.sectionTitle}>Hitch Schedule</Text>
+        <Text style={s.note}>Days on / days off, and the first day of any hitch you know. Powers the calendar, days-home countdown, and year projection.</Text>
+
+        <Text style={s.label}>Days On</Text>
+        <NumField value={hitchOn} onChangeText={setHitchOn} keyboardType="number-pad" placeholder="28" />
+
+        <Text style={s.label}>Days Off</Text>
+        <NumField value={hitchOff} onChangeText={setHitchOff} keyboardType="number-pad" placeholder="14" />
+
+        <Text style={s.label}>First Day of a Hitch</Text>
+        {hitchAnchor ? (
+          <>
+            <DateField value={hitchAnchor} onChange={setHitchAnchor} />
+            <Pressable onPress={() => setHitchAnchor('')}><Text style={[s.note, { color: t.danger }]}>Turn off schedule</Text></Pressable>
+          </>
+        ) : (
+          <Pressable style={s.anchorBtn} onPress={() => setHitchAnchor(new Date().toISOString().slice(0, 10))}>
+            <Text style={s.anchorText}>Set anchor date</Text>
+          </Pressable>
+        )}
+
         <Pressable style={s.saveBtn} onPress={save}><Text style={s.saveText}>Save</Text></Pressable>
 
         <Text style={s.sectionTitle}>Clients</Text>
@@ -171,4 +199,6 @@ const makeStyles = (t: AppColors) =>
     devTitle: { fontSize: 12, color: t.faint, marginBottom: 8 },
     devBtn: { paddingVertical: 12 },
     devBtnText: { fontSize: 14, color: t.ink },
+    anchorBtn: { height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+    anchorText: { fontSize: 14, color: t.accent },
   });

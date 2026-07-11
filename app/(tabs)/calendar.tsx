@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useTheme, AppColors } from '../../theme/colors';
 import { AmountText } from '../../components/AmountText';
 import { useStore, DayEntry } from '../../lib/store';
+import { phaseFor } from '../../lib/hitch';
 import { money, todayISO, monthLabel, addMonths, toISODate } from '../../lib/format';
 
 // Calendar-first log. The grid is the primary surface: days colored by status,
@@ -15,7 +16,7 @@ export default function CalendarScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const { dayEntries } = useStore();
+  const { dayEntries, profile } = useStore();
 
   const now = new Date();
   const [ym, setYm] = useState({ year: now.getFullYear(), month: now.getMonth() });
@@ -103,10 +104,13 @@ export default function CalendarScreen() {
             const e = byDate.get(cell.iso);
             const c = cellColor(e);
             const isToday = cell.iso === today;
+            // Future scheduled-on days get a faint tint so the rotation shows ahead.
+            const scheduledOn = !e && cell.iso > today && phaseFor(profile, cell.iso) === 'on';
+            const bg = scheduledOn ? t.success + '22' : c.bg;
             return (
               <Pressable
                 key={i}
-                style={[s.cell, { backgroundColor: c.bg, borderColor: isToday ? t.ink : c.border }]}
+                style={[s.cell, { backgroundColor: bg, borderColor: isToday ? t.ink : c.border }]}
                 onPress={() => open(cell)}
               >
                 <Text style={[s.cellText, { color: c.fg }]}>{cell.day}</Text>
