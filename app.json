@@ -10,16 +10,26 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.page4films.hitchwell"
+      "bundleIdentifier": "com.page4films.hitchwell",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.page4films.hitchwell"
+      "package": "com.page4films.hitchwell",
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
       [
         "expo-local-authentication",
-        { "faceIDPermission": "Reveal your income and expense amounts." }
+        {
+          "faceIDPermission": "Reveal your income and expense amounts."
+        }
       ],
       [
         "expo-image-picker",
@@ -31,6 +41,12 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1c8b38fb-be03-4075-8716-10c5188e39e6"
+      }
     }
   }
 }
