@@ -91,6 +91,8 @@ export type Profile = {
   payPeriod: PayPeriod;
   paymentTermsDays: number;  // days from billing to payment, e.g. net-30
   perDiemMie: number;        // default daily M&IE (GSA FY2026 standard = 68)
+  travelDayRate: number;     // 0 = same as defaultDayRate
+  standbyDayRate: number;    // 0 = same as defaultDayRate
 };
 
 type State = {
@@ -136,6 +138,8 @@ const defaultProfile: Profile = {
   payPeriod: 'monthly',
   paymentTermsDays: 30,
   perDiemMie: 68,
+  travelDayRate: 0,
+  standbyDayRate: 0,
 };
 
 export const useStore = create<State>()(
@@ -214,7 +218,7 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 6,
+      version: 7,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;

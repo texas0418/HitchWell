@@ -80,7 +80,7 @@ export default function CalendarScreen() {
           <Pressable hitSlop={10} onPress={() => setYm((c) => addMonths(c.year, c.month, -1))}>
             <Ionicons name="chevron-back" size={20} color={t.ink} />
           </Pressable>
-          <Text style={s.month}>{monthLabel(ym.year, ym.month).toLowerCase()}</Text>
+          <Text style={s.month}>{monthLabel(ym.year, ym.month)}</Text>
           <Pressable hitSlop={10} onPress={() => setYm((c) => addMonths(c.year, c.month, 1))}>
             <Ionicons name="chevron-forward" size={20} color={t.ink} />
           </Pressable>
@@ -130,8 +130,8 @@ export default function CalendarScreen() {
               <Text style={s.rowDate}>{e.date.slice(5)}</Text>
               <Text style={s.rowMain} numberOfLines={1}>
                 {typeLabel(e)}
-                {e.state ? ` · ${e.state.toLowerCase()}` : ''}
-                {e.client ? ` · ${e.client.toLowerCase()}` : ''}
+                {e.state ? ` · ${e.state}` : ''}
+                {e.client ? ` · ${e.client}` : ''}
               </Text>
               <AmountText style={s.rowAmt}>{money(e.rate)}</AmountText>
             </Pressable>

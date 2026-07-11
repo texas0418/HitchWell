@@ -3,6 +3,7 @@
     "name": "HitchWell",
     "slug": "hitchwell",
     "version": "0.1.0",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "scheme": "hitchwell",
     "userInterfaceStyle": "automatic",
@@ -18,9 +19,7 @@
       "expo-router",
       [
         "expo-local-authentication",
-        {
-          "faceIDPermission": "Reveal your income and expense amounts."
-        }
+        { "faceIDPermission": "Reveal your income and expense amounts." }
       ],
       [
         "expo-image-picker",
@@ -28,12 +27,7 @@
           "photosPermission": "HitchWell attaches receipt photos to your expenses.",
           "cameraPermission": "HitchWell uses the camera to capture receipt photos."
         }
-      ],
-      "expo-status-bar",
-      "expo-font",
-      "expo-splash-screen",
-      "@react-native-community/datetimepicker",
-      "expo-sharing"
+      ]
     ],
     "experiments": {
       "typedRoutes": false

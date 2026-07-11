@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/colors';
-import { OILFIELD_STATES, PICKER_STATES } from '../lib/states';
+import { OILFIELD_STATES, ALL_STATES, STATE_NAMES } from '../lib/states';
 
-// Compact all-states picker. Shows the oilfield states (plus home/current
-// selection) as a dense grid; "all states" expands to the full 51.
+// Dropdown state picker. The field shows the current state; tapping opens a
+// full-screen sheet listing oilfield states first, then all states A-Z.
 export function StatePicker({
   value,
   onChange,
@@ -15,39 +16,83 @@ export function StatePicker({
   pinned?: string;
 }) {
   const t = useTheme();
-  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const short = Array.from(new Set([...(pinned ? [pinned] : []), ...(value ? [value] : []), ...OILFIELD_STATES]));
-  const list = expanded ? PICKER_STATES : short;
+  const rest = [...ALL_STATES].sort().filter((s) => !OILFIELD_STATES.includes(s));
+
+  const pick = (s: string) => {
+    onChange(s);
+    setOpen(false);
+  };
+
+  const RowItem = ({ code }: { code: string }) => {
+    const on = value === code;
+    return (
+      <Pressable
+        onPress={() => pick(code)}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          paddingVertical: 13, paddingHorizontal: 16,
+          borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline2,
+          backgroundColor: on ? t.surface : 'transparent',
+        }}
+      >
+        <Text style={{ fontSize: 15, color: t.ink, fontWeight: on ? '500' : '400' }}>
+          {code}  <Text style={{ color: t.muted, fontWeight: '400' }}>{STATE_NAMES[code]}</Text>
+        </Text>
+        {on && <Ionicons name="checkmark" size={17} color={t.ink} />}
+      </Pressable>
+    );
+  };
 
   return (
-    <View>
-      <View style={styles.grid}>
-        {list.map((s) => {
-          const on = value === s;
-          return (
-            <Pressable
-              key={s}
-              onPress={() => onChange(s)}
-              style={{
-                width: 44, paddingVertical: 8, alignItems: 'center', borderRadius: 6,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: on ? t.ink : t.border,
-                backgroundColor: on ? t.ink : 'transparent',
-              }}
-            >
-              <Text style={{ fontSize: 13, color: on ? t.onInk : t.ink, fontWeight: on ? '500' : '400' }}>{s}</Text>
+    <>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={{
+          height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8,
+          paddingHorizontal: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+          backgroundColor: t.bg,
+        }}
+        accessibilityRole="button"
+      >
+        <Text style={{ fontSize: 16, color: value ? t.ink : t.faint }}>
+          {value ? `${value} — ${STATE_NAMES[value] ?? ''}` : 'Select state'}
+        </Text>
+        <Ionicons name="chevron-down" size={16} color={t.faint} />
+      </Pressable>
+
+      <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: t.bg }}>
+          <View
+            style={{
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+              paddingHorizontal: 16, paddingVertical: 14,
+              borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: '500', color: t.ink }}>State</Text>
+            <Pressable onPress={() => setOpen(false)} hitSlop={10}>
+              <Ionicons name="close" size={20} color={t.ink} />
             </Pressable>
-          );
-        })}
-        <Pressable onPress={() => setExpanded((e) => !e)} style={{ paddingVertical: 8, paddingHorizontal: 10, justifyContent: 'center' }}>
-          <Text style={{ fontSize: 12, color: t.faint }}>{expanded ? 'fewer ↑' : 'all states ↓'}</Text>
-        </Pressable>
-      </View>
-    </View>
+          </View>
+          <ScrollView>
+            <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
+              oilfield states
+            </Text>
+            {Array.from(new Set([...(pinned ? [pinned] : []), ...OILFIELD_STATES])).map((c) => (
+              <RowItem key={c} code={c} />
+            ))}
+            <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 }}>
+              all states
+            </Text>
+            {rest.map((c) => (
+              <RowItem key={c} code={c} />
+            ))}
+            <View style={{ height: 30 }} />
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-});

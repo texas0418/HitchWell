@@ -138,7 +138,18 @@ export default function EntryScreen() {
       <Text style={s.label}>type</Text>
       <View style={s.chipRow}>
         {TYPES.map((ty) => (
-          <Chip key={ty.key} label={ty.label} selected={type === ty.key} onPress={() => setType(ty.key)} />
+          <Chip
+            key={ty.key}
+            label={ty.label}
+            selected={type === ty.key}
+            onPress={() => {
+              setType(ty.key);
+              // Auto-fill the rate for the picked type (0 = same as day rate).
+              if (ty.key === 'worked') setRate(String(profile.defaultDayRate));
+              else if (ty.key === 'travel') setRate(String(profile.travelDayRate || profile.defaultDayRate));
+              else if (ty.key === 'standby') setRate(String(profile.standbyDayRate || profile.defaultDayRate));
+            }}
+          />
         ))}
       </View>
 

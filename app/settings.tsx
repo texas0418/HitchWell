@@ -18,6 +18,8 @@ export default function SettingsScreen() {
 
   const [name, setName] = useState(profile.name);
   const [rate, setRate] = useState(String(profile.defaultDayRate));
+  const [travelRate, setTravelRate] = useState(String(profile.travelDayRate || ''));
+  const [standbyRate, setStandbyRate] = useState(String(profile.standbyDayRate || ''));
   const [mileageRate, setMileageRate] = useState(String(profile.mileageRate));
   const [taxPct, setTaxPct] = useState(String(Math.round(profile.taxSetAsidePct * 100)));
   const [homeState, setHomeState] = useState(profile.homeState);
@@ -37,6 +39,8 @@ export default function SettingsScreen() {
     setProfile({
       name: name.trim(),
       defaultDayRate: Number(rate) || 0,
+      travelDayRate: Number(travelRate) || 0,
+      standbyDayRate: Number(standbyRate) || 0,
       mileageRate: Number(mileageRate) || 0,
       taxSetAsidePct: (Number(taxPct) || 0) / 100,
       homeState,
@@ -62,6 +66,13 @@ export default function SettingsScreen() {
 
         <Text style={s.label}>default day rate ($)</Text>
         <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
+
+        <Text style={s.label}>travel day rate ($)</Text>
+        <NumField value={travelRate} onChangeText={setTravelRate} keyboardType="number-pad" placeholder="same as day rate" />
+
+        <Text style={s.label}>standby day rate ($)</Text>
+        <NumField value={standbyRate} onChangeText={setStandbyRate} keyboardType="number-pad" placeholder="same as day rate" />
+        <Text style={s.note}>Leave blank to use your default day rate. The log sheet fills the rate by day type.</Text>
 
         <Text style={s.label}>IRS mileage rate ($/mi)</Text>
         <NumField value={mileageRate} onChangeText={setMileageRate} />
