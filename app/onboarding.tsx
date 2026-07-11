@@ -30,13 +30,13 @@ export default function Onboarding() {
         <Text style={s.brand}>HitchWell</Text>
         <Text style={s.lead}>A few defaults so logging a day takes one tap. All of it can change later in settings.</Text>
 
-        <Text style={s.label}>Your usual day rate ($)</Text>
+        <Text style={s.label}>Your Usual Day Rate ($)</Text>
         <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
 
-        <Text style={s.label}>Home state</Text>
+        <Text style={s.label}>Home State</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
 
-        <Text style={s.label}>Pay period</Text>
+        <Text style={s.label}>Pay Period</Text>
         <View style={s.chipRow}>
           {PAY_PERIODS.map((p) => (
             <Chip key={p.key} label={p.label} selected={payPeriod === p.key} onPress={() => setPayPeriod(p.key)} />
@@ -45,7 +45,7 @@ export default function Onboarding() {
         <Text style={s.note}>This sets how your expense reports group hours, mileage, and receipts.</Text>
 
         <Pressable style={s.btn} onPress={start}>
-          <Text style={s.btnText}>Get started</Text>
+          <Text style={s.btnText}>Get Started</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

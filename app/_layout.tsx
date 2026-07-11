@@ -35,11 +35,11 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" options={{ title: 'Back' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen name="entry" options={{ presentation: 'modal', headerShown: true, title: 'Log days' }} />
-          <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly report' }} />
+          <Stack.Screen name="entry" options={{ presentation: 'modal', headerShown: true, title: 'Log Days' }} />
+          <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly Report' }} />
           <Stack.Screen name="expenses" options={{ headerShown: true, title: 'Expenses' }} />
           <Stack.Screen name="mileage" options={{ headerShown: true, title: 'Mileage' }} />
-          <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & tickets' }} />
+          <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & Tickets' }} />
           <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
         </Stack>
       </PrivacyProvider>

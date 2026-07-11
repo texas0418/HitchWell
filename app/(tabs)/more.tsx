@@ -43,13 +43,13 @@ export default function MoreScreen() {
         <Text style={styles.title}>More</Text>
 
         <View style={styles.group}>
-          <Row icon={<Ionicons name="document-text-outline" size={20} color={colors.ink} />} label="Monthly report" hint="By client, ready to bill" onPress={() => router.push('/report')} />
+          <Row icon={<Ionicons name="document-text-outline" size={20} color={colors.ink} />} label="Monthly Report" hint="By client, ready to bill" onPress={() => router.push('/report')} />
         </View>
 
         <View style={styles.group}>
           <Row icon={<Ionicons name="receipt-outline" size={20} color={colors.ink} />} label="Expenses" hint={`${expenses.length} logged`} onPress={() => router.push('/expenses')} />
           <Row icon={<Ionicons name="car-outline" size={20} color={colors.ink} />} label="Mileage" hint={`${mileage.length} trips`} onPress={() => router.push('/mileage')} />
-          <Row icon={<MaterialCommunityIcons name="shield-check-outline" size={20} color={colors.ink} />} label="Certs & tickets" hint={expiringCerts ? `${expiringCerts} need attention` : `${certs.length} tracked`} onPress={() => router.push('/certs')} />
+          <Row icon={<MaterialCommunityIcons name="shield-check-outline" size={20} color={colors.ink} />} label="Certs & Tickets" hint={expiringCerts ? `${expiringCerts} need attention` : `${certs.length} tracked`} onPress={() => router.push('/certs')} />
         </View>
 
         <View style={styles.group}>

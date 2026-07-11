@@ -51,10 +51,10 @@ export default function HomeScreen() {
 
         {empty ? (
           <View style={s.emptyWrap}>
-            <Text style={s.emptyTitle}>Nothing logged yet</Text>
+            <Text style={s.emptyTitle}>Nothing Logged Yet</Text>
             <Text style={s.emptyNote}>Log a day and your income, tax hold, and state split build from there.</Text>
             <Pressable style={s.primaryBtn} onPress={() => router.push('/entry')}>
-              <Text style={s.primaryText}>Log first day · {money(profile.defaultDayRate)}</Text>
+              <Text style={s.primaryText}>Log First Day · {money(profile.defaultDayRate)}</Text>
             </Pressable>
           </View>
         ) : (
@@ -65,15 +65,15 @@ export default function HomeScreen() {
             </View>
 
             <Row s={s} k="Income" v={<AmountText style={s.v}>{money(inc)}</AmountText>} />
-            <Row s={s} k="Tax set-aside" v={<AmountText style={[s.v, { color: t.danger }]}>{money(setAside)}</AmountText>} />
-            <Row s={s} k={`Per diem · ${pdDays}d`} v={<AmountText style={s.v}>{money(pdTotal)}</AmountText>} />
+            <Row s={s} k="Tax Set-Aside" v={<AmountText style={[s.v, { color: t.danger }]}>{money(setAside)}</AmountText>} />
+            <Row s={s} k={`Per Diem · ${pdDays}d`} v={<AmountText style={s.v}>{money(pdTotal)}</AmountText>} />
             <Row
               s={s}
-              k="Reimbursable open"
+              k="Reimbursable Open"
               v={<AmountText style={[s.v, { color: t.accent }]}>{money(reimbOpen)}</AmountText>}
               onPress={() => router.push('/expenses')}
             />
-            <Row s={s} k="Days out" v={<Text style={s.v}>{out}</Text>} />
+            <Row s={s} k="Days Out" v={<Text style={s.v}>{out}</Text>} />
             <Row s={s} k="Mileage" v={<Text style={s.v}>{num(miles)} mi</Text>} />
 
             {nextCert && (

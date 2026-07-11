@@ -57,7 +57,7 @@ export function StatePicker({
         accessibilityRole="button"
       >
         <Text style={{ fontSize: 16, color: value ? t.ink : t.faint }}>
-          {value ? `${value} — ${STATE_NAMES[value] ?? ''}` : 'Select state'}
+          {value ? `${value} — ${STATE_NAMES[value] ?? ''}` : 'Select State'}
         </Text>
         <Ionicons name="chevron-down" size={16} color={t.faint} />
       </Pressable>
@@ -78,13 +78,13 @@ export function StatePicker({
           </View>
           <ScrollView>
             <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 }}>
-              Oilfield states
+              Oilfield States
             </Text>
             {Array.from(new Set([...(pinned ? [pinned] : []), ...OILFIELD_STATES])).map((c) => (
               <RowItem key={c} code={c} />
             ))}
             <Text style={{ fontSize: 11, color: t.faint, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 }}>
-              All states
+              All States
             </Text>
             {rest.map((c) => (
               <RowItem key={c} code={c} />

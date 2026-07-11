@@ -112,20 +112,20 @@ export default function EntryScreen() {
       {!existing && (
         <View style={s.modeRow}>
           <Pressable style={[s.modeBtn, !range && s.modeOn]} onPress={() => setRange(false)}>
-            <Text style={[s.modeText, !range && s.modeTextOn]}>Single day</Text>
+            <Text style={[s.modeText, !range && s.modeTextOn]}>Single Day</Text>
           </Pressable>
           <Pressable style={[s.modeBtn, range && s.modeOn]} onPress={() => setRange(true)}>
-            <Text style={[s.modeText, range && s.modeTextOn]}>Date range</Text>
+            <Text style={[s.modeText, range && s.modeTextOn]}>Date Range</Text>
           </Pressable>
         </View>
       )}
 
-      <Text style={s.label}>{range && !existing ? 'First day' : 'Date'}</Text>
+      <Text style={s.label}>{range && !existing ? 'First Day' : 'Date'}</Text>
       <DateField value={date} onChange={(d) => { setDate(d); if (endDate < d) setEndDate(d); }} />
 
       {range && !existing && (
         <>
-          <Text style={s.label}>Last day</Text>
+          <Text style={s.label}>Last Day</Text>
           <DateField value={endDate} onChange={setEndDate} />
           {rangeDays > 1 && (
             <Text style={s.rangeNote}>
@@ -170,17 +170,17 @@ export default function EntryScreen() {
             placeholderTextColor={t.faint}
           />
 
-          <Text style={s.label}>Client / staffing house</Text>
+          <Text style={s.label}>Client / Staffing House</Text>
           <ClientField value={client} onChange={setClient} />
 
           <View style={s.switchRow}>
-            <Text style={s.switchLabel}>Per diem {range && rangeDays > 1 ? 'days' : 'day'}</Text>
+            <Text style={s.switchLabel}>Per Diem {range && rangeDays > 1 ? 'Days' : 'Day'}</Text>
             <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ true: t.accent }} />
           </View>
 
           {perDiem && (
             <View style={s.perDiemBox}>
-              <Text style={s.label}>M&IE amount ($/day)</Text>
+              <Text style={s.label}>M&IE Amount ($/day)</Text>
               <NumField value={perDiemAmt} onChangeText={setPerDiemAmt} placeholder="0" />
               {(() => {
                 const areaMie = mieForLocation(state, location, profile.perDiemMie);
@@ -217,13 +217,13 @@ export default function EntryScreen() {
 
       <Pressable style={s.saveBtn} onPress={save}>
         <Text style={s.saveText}>
-          {existing ? 'Save changes' : range && rangeDays > 1 ? `Log ${rangeDays} days` : 'Save day'}
+          {existing ? 'Save Changes' : range && rangeDays > 1 ? `Log ${rangeDays} Days` : 'Save Day'}
         </Text>
       </Pressable>
 
       {existing && (
         <Pressable style={s.delBtn} onPress={del}>
-          <Text style={s.delText}>Delete this day</Text>
+          <Text style={s.delText}>Delete This Day</Text>
         </Pressable>
       )}
     </ScrollView>
