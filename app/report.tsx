@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
+import { useRouter } from 'expo-router';
 import { useStore, CATEGORY_LABEL } from '../lib/store';
 import { buildMonthlyReport, buildReportText, clientLabel } from '../lib/report';
 import { buildReportHtml } from '../lib/reportHtml';
@@ -16,6 +17,7 @@ import { money, num, monthLabel, addMonths, longDateYear, monthName } from '../l
 export default function ReportScreen() {
   const t = useTheme();
   const styles = React.useMemo(() => makeStyles(t), [t]);
+  const router = useRouter();
   const { dayEntries, expenses, mileage, profile } = useStore();
 
   const now = new Date();
@@ -120,6 +122,9 @@ export default function ReportScreen() {
                 {c.deductible > 0 && (
                   <View style={styles.line}><Text style={styles.kMuted}>Your deductions (not billed)</Text><AmountText style={styles.vMuted}>{money(c.deductible)}</AmountText></View>
                 )}
+                <Pressable onPress={() => router.push(`/invoice?client=${encodeURIComponent(c.client)}&year=${ym.year}&month=${ym.month}`)}>
+                  <Text style={styles.invoiceLink}>Create Invoice →</Text>
+                </Pressable>
               </View>
             ))}
 
@@ -168,6 +173,7 @@ const makeStyles = (t: AppColors) => StyleSheet.create({
   client: { fontSize: 16, fontWeight: '500', color: t.ink, flexShrink: 1 },
   invoice: { fontSize: 22, fontWeight: '600', color: t.accent },
   invoiceLabel: { fontSize: 11, color: t.muted, textAlign: 'right', marginTop: -2, marginBottom: 8 },
+  invoiceLink: { fontSize: 13, color: t.accent, marginTop: 10 },
 
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 },
   mileRight: { flexDirection: 'row', alignItems: 'center' },

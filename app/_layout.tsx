@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PrivacyProvider } from '../context/PrivacyContext';
@@ -36,8 +38,21 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" options={{ title: 'Back' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen name="entry" options={{ presentation: 'modal', headerShown: true, title: 'Log Days' }} />
+          <Stack.Screen
+            name="entry"
+            options={{
+              presentation: 'modal',
+              headerShown: true,
+              title: 'Log Days',
+              headerLeft: () => (
+                <Pressable onPress={() => router.back()} hitSlop={10} accessibilityLabel="Close">
+                  <Ionicons name="close" size={22} color={t.ink} />
+                </Pressable>
+              ),
+            }}
+          />
           <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly Report' }} />
+          <Stack.Screen name="invoice" options={{ headerShown: true, title: 'Invoice' }} />
           <Stack.Screen name="expenses" options={{ headerShown: true, title: 'Expenses' }} />
           <Stack.Screen name="mileage" options={{ headerShown: true, title: 'Mileage' }} />
           <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & Tickets' }} />

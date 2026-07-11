@@ -27,6 +27,11 @@ export default function SettingsScreen() {
   const [payPeriod, setPayPeriod] = useState<PayPeriod>(profile.payPeriod);
   const [termsDays, setTermsDays] = useState(String(profile.paymentTermsDays));
   const [perDiemMie, setPerDiemMie] = useState(String(profile.perDiemMie));
+  const [bizName, setBizName] = useState(profile.businessName);
+  const [bizAddress, setBizAddress] = useState(profile.businessAddress);
+  const [bizPhone, setBizPhone] = useState(profile.businessPhone);
+  const [bizEmail, setBizEmail] = useState(profile.businessEmail);
+  const [payInstr, setPayInstr] = useState(profile.paymentInstructions);
   const [hitchOn, setHitchOn] = useState(String(profile.hitchOnDays || ''));
   const [hitchOff, setHitchOff] = useState(String(profile.hitchOffDays || ''));
   const [hitchAnchor, setHitchAnchor] = useState(profile.hitchAnchor);
@@ -54,6 +59,11 @@ export default function SettingsScreen() {
       hitchOnDays: Number(hitchOn) || 0,
       hitchOffDays: Number(hitchOff) || 0,
       hitchAnchor,
+      businessName: bizName.trim(),
+      businessAddress: bizAddress.trim(),
+      businessPhone: bizPhone.trim(),
+      businessEmail: bizEmail.trim(),
+      paymentInstructions: payInstr.trim(),
     });
     router.back();
   };
@@ -119,6 +129,38 @@ export default function SettingsScreen() {
         <Text style={s.label}>Per Diem M&IE ($/day)</Text>
         <NumField value={perDiemMie} onChangeText={setPerDiemMie} />
         <Text style={s.note}>GSA FY2026 standard CONUS is $68. Higher-cost areas differ; check gsa.gov/perdiem.</Text>
+
+        <Text style={s.sectionTitle}>Business Details</Text>
+        <Text style={s.note}>Appears on the From block of your invoices. All optional.</Text>
+
+        <Text style={s.label}>Business Name</Text>
+        <TextInput style={s.input} value={bizName} onChangeText={setBizName} placeholder="falls back to your name" placeholderTextColor={t.faint} />
+
+        <Text style={s.label}>Address</Text>
+        <TextInput
+          style={[s.input, s.multiline]}
+          value={bizAddress}
+          onChangeText={setBizAddress}
+          placeholder="street, city, state, zip"
+          placeholderTextColor={t.faint}
+          multiline
+        />
+
+        <Text style={s.label}>Phone</Text>
+        <TextInput style={s.input} value={bizPhone} onChangeText={setBizPhone} keyboardType="phone-pad" placeholder="optional" placeholderTextColor={t.faint} />
+
+        <Text style={s.label}>Email</Text>
+        <TextInput style={s.input} value={bizEmail} onChangeText={setBizEmail} keyboardType="email-address" autoCapitalize="none" placeholder="optional" placeholderTextColor={t.faint} />
+
+        <Text style={s.label}>Payment Instructions</Text>
+        <TextInput
+          style={[s.input, s.multiline]}
+          value={payInstr}
+          onChangeText={setPayInstr}
+          placeholder="e.g. ACH routing/account, or check payable to…"
+          placeholderTextColor={t.faint}
+          multiline
+        />
 
         <Text style={s.sectionTitle}>Hitch Schedule</Text>
         <Text style={s.note}>Days on / days off, and the first day of any hitch you know. Powers the calendar, days-home countdown, and year projection.</Text>
@@ -199,6 +241,7 @@ const makeStyles = (t: AppColors) =>
     devTitle: { fontSize: 12, color: t.faint, marginBottom: 8 },
     devBtn: { paddingVertical: 12 },
     devBtnText: { fontSize: 14, color: t.ink },
+    multiline: { height: 88, paddingTop: 12, textAlignVertical: 'top' },
     anchorBtn: { height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
     anchorText: { fontSize: 14, color: t.accent },
   });

@@ -9,6 +9,7 @@ import { NumField } from '../components/NumField';
 import { StatePicker } from '../components/StatePicker';
 import { useStore, DayType } from '../lib/store';
 import { firstLastMie, mieForLocation, findArea } from '../lib/perdiem';
+import { hitchStatus } from '../lib/hitch';
 import { todayISO, addDays, longDate } from '../lib/format';
 
 const TYPES: { key: DayType; label: string }[] = [
@@ -107,6 +108,18 @@ export default function EntryScreen() {
     return n;
   }, [range, date, endDate]);
 
+  // Quick-fill for the schedule: the hitch you're on now, or the next one.
+  const hitchFill = useMemo(() => {
+    const hs = hitchStatus(profile);
+    if (!hs) return null;
+    if (hs.phase === 'on') {
+      const start = addDays(todayISO(), -(hs.dayInPhase - 1));
+      return { label: 'This Hitch', start, end: addDays(start, hs.phaseLength - 1) };
+    }
+    const start = hs.nextChange;
+    return { label: 'Next Hitch', start, end: addDays(start, (profile.hitchOnDays || 1) - 1) };
+  }, [profile]);
+
   return (
     <ScrollView style={s.safe} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
       {!existing && (
@@ -127,6 +140,15 @@ export default function EntryScreen() {
         <>
           <Text style={s.label}>Last Day</Text>
           <DateField value={endDate} onChange={setEndDate} />
+          {hitchFill && (
+            <View style={[s.chipRow, { marginTop: 10 }]}>
+              <Chip
+                label={`${hitchFill.label} · ${longDate(hitchFill.start)} – ${longDate(hitchFill.end)}`}
+                selected={date === hitchFill.start && endDate === hitchFill.end}
+                onPress={() => { setDate(hitchFill.start); setEndDate(hitchFill.end); }}
+              />
+            </View>
+          )}
           {rangeDays > 1 && (
             <Text style={s.rangeNote}>
               {rangeDays} days · {longDate(date)} to {longDate(endDate)} · same info applied to each, already-logged days skipped

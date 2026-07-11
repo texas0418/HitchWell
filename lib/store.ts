@@ -91,6 +91,12 @@ export type Profile = {
   payPeriod: PayPeriod;
   paymentTermsDays: number;  // days from billing to payment, e.g. net-30
   perDiemMie: number;        // default daily M&IE (GSA FY2026 standard = 68)
+  businessName: string;      // invoice From block; falls back to name
+  businessAddress: string;   // multi-line
+  businessPhone: string;
+  businessEmail: string;
+  paymentInstructions: string; // e.g. "ACH: ... " or "Check payable to ..."
+
   travelDayRate: number;     // 0 = same as defaultDayRate
   standbyDayRate: number;    // 0 = same as defaultDayRate
   hitchOnDays: number;       // rotation days on (0 = schedule off)
@@ -104,6 +110,7 @@ type State = {
   profile: Profile;
   onboarded: boolean;
   appearance: Appearance;
+  invoiceCounter: number;
   clients: string[];
   dayEntries: DayEntry[];
   expenses: Expense[];
@@ -112,6 +119,7 @@ type State = {
 
   setOnboarded: (v: boolean) => void;
   setAppearance: (a: Appearance) => void;
+  bumpInvoiceCounter: () => void;
   addClient: (name: string) => void;
   removeClient: (name: string) => void;
 
@@ -145,6 +153,11 @@ const defaultProfile: Profile = {
   payPeriod: 'monthly',
   paymentTermsDays: 30,
   perDiemMie: 68,
+  businessName: '',
+  businessAddress: '',
+  businessPhone: '',
+  businessEmail: '',
+  paymentInstructions: '',
   travelDayRate: 0,
   standbyDayRate: 0,
   hitchOnDays: 28,
@@ -158,6 +171,7 @@ export const useStore = create<State>()(
       profile: defaultProfile,
       onboarded: false,
       appearance: 'system' as Appearance,
+      invoiceCounter: 1,
       clients: [],
       dayEntries: [],
       expenses: [],
@@ -166,6 +180,7 @@ export const useStore = create<State>()(
 
       setOnboarded: (v) => set(() => ({ onboarded: v })),
       setAppearance: (a) => set(() => ({ appearance: a })),
+      bumpInvoiceCounter: () => set((s) => ({ invoiceCounter: (s.invoiceCounter || 1) + 1 })),
 
       addClient: (name) =>
         set((s) => {
@@ -230,11 +245,12 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 9,
+      version: 11,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;
         if (!persisted.appearance) persisted.appearance = 'system';
+        if (!persisted.invoiceCounter) persisted.invoiceCounter = 1;
         persisted.profile = { ...defaultProfile, ...(persisted.profile ?? {}) };
         // Older expenses had no reimbursable flag; default them to deductible.
         if (Array.isArray(persisted.expenses)) {
