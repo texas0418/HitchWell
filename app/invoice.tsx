@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -12,6 +12,7 @@ import { DateField } from '../components/DateField';
 import { useStore, CATEGORY_LABEL, DayType } from '../lib/store';
 import { buildInvoiceHtml, InvoiceLine } from '../lib/invoiceHtml';
 import { buildReceiptItems } from '../lib/receiptEmbed';
+import { mayExport } from '../lib/purchases';
 import { money, periodBounds, addDays, longDate } from '../lib/format';
 
 const TYPE_LABEL: Record<DayType, string> = { worked: 'Worked', travel: 'Travel', standby: 'Standby', off: 'Off' };
@@ -19,6 +20,7 @@ const TYPE_LABEL: Record<DayType, string> = { worked: 'Worked', travel: 'Travel'
 export default function InvoiceScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
+  const router = useRouter();
   const params = useLocalSearchParams<{ client?: string; year?: string; month?: string }>();
   const { dayEntries, expenses, profile, invoiceCounter, bumpInvoiceCounter } = useStore();
 
@@ -84,6 +86,10 @@ export default function InvoiceScreen() {
   const dueDate = addDays(end, profile.paymentTermsDays || 0);
 
   const onExport = async () => {
+    if (!mayExport()) {
+      router.push('/paywall');
+      return;
+    }
     try {
       const receipts = (
         await buildReceiptItems(expenses.filter((e) => matchesProject(e.project)), periodStart, end)

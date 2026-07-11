@@ -47,6 +47,10 @@ export default function SettingsMenu() {
           <Row s={s} t={t} icon="archive-outline" label="Backup & Data" hint="Export, import, sample, clear" onPress={() => router.push('/settings-data')} />
         </View>
 
+        <View style={s.group}>
+          <Row s={s} t={t} icon="ribbon-outline" label="HitchWell Pro" hint="Unlock PDF reports and invoices" onPress={() => router.push('/paywall')} />
+        </View>
+
         <Text style={s.appLabel}>Appearance</Text>
         <View style={s.chipRow}>
           {(['system', 'light', 'dark'] as Appearance[]).map((a) => (

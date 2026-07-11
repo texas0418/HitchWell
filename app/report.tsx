@@ -12,6 +12,7 @@ import { useStore, CATEGORY_LABEL } from '../lib/store';
 import { buildMonthlyReport, buildReportText, clientLabel } from '../lib/report';
 import { buildReportHtml } from '../lib/reportHtml';
 import { buildReceiptItems } from '../lib/receiptEmbed';
+import { mayExport } from '../lib/purchases';
 import { money, num, monthLabel, addMonths, longDateYear, monthName } from '../lib/format';
 
 export default function ReportScreen() {
@@ -32,6 +33,10 @@ export default function ReportScreen() {
   const step = (n: number) => setYm((cur) => addMonths(cur.year, cur.month, n));
 
   const onExportPdf = async () => {
+    if (!mayExport()) {
+      router.push('/paywall');
+      return;
+    }
     try {
       // Read this month's receipt photos and embed them per client.
       const receipts = await buildReceiptItems(expenses, report.periodStart, report.billingDate);

@@ -116,6 +116,7 @@ type State = {
   onboarded: boolean;
   appearance: Appearance;
   invoiceCounter: number;
+  proUnlocked: boolean;
   clients: string[];
   projects: string[];
   dayEntries: DayEntry[];
@@ -126,6 +127,7 @@ type State = {
   setOnboarded: (v: boolean) => void;
   setAppearance: (a: Appearance) => void;
   bumpInvoiceCounter: () => void;
+  setProUnlocked: (v: boolean) => void;
   addClient: (name: string) => void;
   removeClient: (name: string) => void;
   addProject: (name: string) => void;
@@ -183,6 +185,7 @@ export const useStore = create<State>()(
       onboarded: false,
       appearance: 'system' as Appearance,
       invoiceCounter: 1,
+      proUnlocked: false,
       clients: [],
       projects: [],
       dayEntries: [],
@@ -193,6 +196,7 @@ export const useStore = create<State>()(
       setOnboarded: (v) => set(() => ({ onboarded: v })),
       setAppearance: (a) => set(() => ({ appearance: a })),
       bumpInvoiceCounter: () => set((s) => ({ invoiceCounter: (s.invoiceCounter || 1) + 1 })),
+      setProUnlocked: (v) => set(() => ({ proUnlocked: v })),
 
       addClient: (name) =>
         set((s) => {
@@ -288,7 +292,7 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 14,
+      version: 15,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;

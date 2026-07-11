@@ -8,6 +8,7 @@ import { PrivacyProvider } from '../context/PrivacyContext';
 import { useTheme, useScheme } from '../theme/colors';
 import { useStore, useHydrated } from '../lib/store';
 import { syncCertNotifications, showCertReminderOnce } from '../lib/certAlerts';
+import { refreshPro } from '../lib/purchases';
 
 export default function RootLayout() {
   const t = useTheme();
@@ -22,6 +23,7 @@ export default function RootLayout() {
     if (!hydrated || !onboarded) return;
     showCertReminderOnce(certs);
     syncCertNotifications(certs);
+    refreshPro();
   }, [hydrated, onboarded, certs]);
 
   return (
@@ -53,6 +55,7 @@ export default function RootLayout() {
           />
           <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly Report' }} />
           <Stack.Screen name="invoice" options={{ headerShown: true, title: 'Invoice' }} />
+          <Stack.Screen name="paywall" options={{ presentation: 'modal', headerShown: true, title: 'HitchWell Pro' }} />
           <Stack.Screen name="expenses" options={{ headerShown: true, title: 'Expenses' }} />
           <Stack.Screen name="mileage" options={{ headerShown: true, title: 'Mileage' }} />
           <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & Tickets' }} />
