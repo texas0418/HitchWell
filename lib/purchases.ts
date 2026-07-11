@@ -61,7 +61,10 @@ export async function refreshPro(): Promise<boolean> {
 
 export async function purchasePro(): Promise<boolean> {
   const P = await ensureConfigured();
-  if (!P) return true;
+  if (!P) {
+    Alert.alert('Purchases not live yet', 'The store is not configured in this build. Exports are free until it is.');
+    return false;
+  }
   try {
     const offerings = await P.getOfferings();
     const pkg = offerings.current?.availablePackages?.[0];
@@ -82,7 +85,10 @@ export async function purchasePro(): Promise<boolean> {
 
 export async function restorePro(): Promise<boolean> {
   const P = await ensureConfigured();
-  if (!P) return true;
+  if (!P) {
+    Alert.alert('Purchases not live yet', 'The store is not configured in this build. Exports are free until it is.');
+    return false;
+  }
   try {
     const info = await P.restorePurchases();
     const owned = !!info.entitlements.active[ENTITLEMENT];

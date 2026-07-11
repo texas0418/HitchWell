@@ -48,14 +48,20 @@ export default function PaywallScreen() {
           </View>
         ) : (
           <>
-            <Pressable style={s.buyBtn} onPress={buy}>
-              <Text style={s.buyText}>Unlock Pro · $19.99</Text>
-            </Pressable>
-            <Pressable style={s.restoreBtn} onPress={() => restorePro()}>
-              <Text style={s.restoreText}>Restore Purchase</Text>
-            </Pressable>
-            {!canGate() && (
-              <Text style={s.note}>Purchases are not live in this build; exports are free for now.</Text>
+            {canGate() ? (
+              <>
+                <Pressable style={s.buyBtn} onPress={buy}>
+                  <Text style={s.buyText}>Unlock Pro · $19.99</Text>
+                </Pressable>
+                <Pressable style={s.restoreBtn} onPress={() => restorePro()}>
+                  <Text style={s.restoreText}>Restore Purchase</Text>
+                </Pressable>
+              </>
+            ) : (
+              <View style={s.disarmedBox}>
+                <Text style={s.disarmedTitle}>Purchases aren't live in this build</Text>
+                <Text style={s.note}>PDF exports are free until the store goes live. The unlock will appear here once it does.</Text>
+              </View>
             )}
           </>
         )}
@@ -78,6 +84,8 @@ const makeStyles = (t: AppColors) =>
     restoreBtn: { paddingVertical: 14, alignItems: 'center' },
     restoreText: { fontSize: 13, color: t.accent },
     note: { fontSize: 11, color: t.faint, textAlign: 'center', marginTop: 4 },
+    disarmedBox: { marginTop: 30, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 10, padding: 16 },
+    disarmedTitle: { fontSize: 14, fontWeight: '500', color: t.ink, marginBottom: 4 },
     ownedBox: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 30, justifyContent: 'center' },
     ownedText: { fontSize: 14, color: t.ink },
   });
