@@ -1,148 +1,53 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
-import { NumField } from '../components/NumField';
-import { DateField } from '../components/DateField';
-import { StatePicker } from '../components/StatePicker';
-import { useStore, PayPeriod, PAY_PERIODS, Appearance } from '../lib/store';
-import { clearAllReceipts } from '../lib/receipts';
-import { exportBackup, pickBackupFile } from '../lib/backup';
+import { useStore, Appearance } from '../lib/store';
 
-export default function SettingsScreen() {
+type S = ReturnType<typeof makeStyles>;
+
+function Row({ s, t, icon, label, hint, onPress }: { s: S; t: AppColors; icon: keyof typeof Ionicons.glyphMap; label: string; hint?: string; onPress: () => void }) {
+  return (
+    <Pressable style={s.row} onPress={onPress}>
+      <View style={s.rowIcon}><Ionicons name={icon} size={19} color={t.ink} /></View>
+      <View style={s.rowBody}>
+        <Text style={s.rowLabel}>{label}</Text>
+        {!!hint && <Text style={s.rowHint}>{hint}</Text>}
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={t.faint} />
+    </Pressable>
+  );
+}
+
+export default function SettingsMenu() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, projects, addProject, removeProject, appearance, setAppearance, importAll } = useStore();
-
-  const onExportBackup = () => {
-    const s = useStore.getState();
-    exportBackup({
-      profile: s.profile,
-      dayEntries: s.dayEntries,
-      expenses: s.expenses,
-      mileage: s.mileage,
-      certs: s.certs,
-      clients: s.clients,
-      projects: s.projects,
-      invoiceCounter: s.invoiceCounter,
-    });
-  };
-
-  const onImportBackup = async () => {
-    const picked = await pickBackupFile();
-    if (picked === 'needs-build') {
-      Alert.alert('Needs an app update', 'Importing uses a component added after this build. Install the next app build to enable it. Export works now.');
-      return;
-    }
-    if (!picked) return;
-    Alert.alert(
-      'Replace all data?',
-      `This replaces everything on this device with the backup from ${picked.exportedAt.slice(0, 10)}. Receipt photos are not part of backups.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Replace', style: 'destructive', onPress: () => importAll(picked.data) },
-      ]
-    );
-  };
-
-  const [name, setName] = useState(profile.name);
-  const [rate, setRate] = useState(String(profile.defaultDayRate));
-  const [travelRate, setTravelRate] = useState(String(profile.travelDayRate || ''));
-  const [standbyRate, setStandbyRate] = useState(String(profile.standbyDayRate || ''));
-  const [mileageRate, setMileageRate] = useState(String(profile.mileageRate));
-  const [taxPct, setTaxPct] = useState(String(Math.round(profile.taxSetAsidePct * 100)));
-  const [homeState, setHomeState] = useState(profile.homeState);
-  const [payPeriod, setPayPeriod] = useState<PayPeriod>(profile.payPeriod);
-  const [termsDays, setTermsDays] = useState(String(profile.paymentTermsDays));
-  const [perDiemMie, setPerDiemMie] = useState(String(profile.perDiemMie));
-  const [bizName, setBizName] = useState(profile.businessName);
-  const [bizAddress, setBizAddress] = useState(profile.businessAddress);
-  const [bizPhone, setBizPhone] = useState(profile.businessPhone);
-  const [bizEmail, setBizEmail] = useState(profile.businessEmail);
-  const [payInstr, setPayInstr] = useState(profile.paymentInstructions);
-  const [hitchOn, setHitchOn] = useState(String(profile.hitchOnDays || ''));
-  const [hitchOff, setHitchOff] = useState(String(profile.hitchOffDays || ''));
-  const [hitchAnchor, setHitchAnchor] = useState(profile.hitchAnchor);
-  const [clientDraft, setClientDraft] = useState('');
-  const [projectDraft, setProjectDraft] = useState('');
-
-  const addProjectFromDraft = () => {
-    const n = projectDraft.trim();
-    if (!n) return;
-    addProject(n);
-    setProjectDraft('');
-  };
-
-  const addClientFromDraft = () => {
-    const n = clientDraft.trim();
-    if (!n) return;
-    addClient(n);
-    setClientDraft('');
-  };
-
-  const save = () => {
-    setProfile({
-      name: name.trim(),
-      defaultDayRate: Number(rate) || 0,
-      travelDayRate: Number(travelRate) || 0,
-      standbyDayRate: Number(standbyRate) || 0,
-      mileageRate: Number(mileageRate) || 0,
-      taxSetAsidePct: (Number(taxPct) || 0) / 100,
-      homeState,
-      payPeriod,
-      paymentTermsDays: Number(termsDays) || 0,
-      perDiemMie: Number(perDiemMie) || 0,
-      hitchOnDays: Number(hitchOn) || 0,
-      hitchOffDays: Number(hitchOff) || 0,
-      hitchAnchor,
-      businessName: bizName.trim(),
-      businessAddress: bizAddress.trim(),
-      businessPhone: bizPhone.trim(),
-      businessEmail: bizEmail.trim(),
-      paymentInstructions: payInstr.trim(),
-    });
-    router.back();
-  };
-
-  const confirmClear = () => {
-    Alert.alert('Clear all data?', 'This removes every day, expense, mileage trip, and cert on this device.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear', style: 'destructive', onPress: () => { clearAll(); clearAllReceipts(); } },
-    ]);
-  };
+  const { appearance, setAppearance } = useStore();
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-        <Text style={s.label}>Name</Text>
-        <TextInput style={s.input} value={name} onChangeText={setName} placeholder="optional" placeholderTextColor={t.faint} />
+      <ScrollView contentContainerStyle={s.content}>
+        <View style={s.group}>
+          <Row s={s} t={t} icon="person-outline" label="Profile" hint="Name, employment, home state" onPress={() => router.push('/settings-profile')} />
+          <Row s={s} t={t} icon="cash-outline" label="Rates" hint="Day, travel, standby, mileage" onPress={() => router.push('/settings-rates')} />
+          <Row s={s} t={t} icon="calendar-outline" label="Billing" hint="Period, terms, per diem, tax hold" onPress={() => router.push('/settings-billing')} />
+          <Row s={s} t={t} icon="briefcase-outline" label="Business Details" hint="Invoice From block and payment info" onPress={() => router.push('/settings-business')} />
+          <Row s={s} t={t} icon="repeat-outline" label="Hitch Schedule" hint="Rotation for calendar and forecasts" onPress={() => router.push('/settings-hitch')} />
+        </View>
 
-        <Text style={s.label}>Default Day Rate ($)</Text>
-        <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
+        <View style={s.group}>
+          <Row s={s} t={t} icon="people-outline" label="Clients & Projects" hint="The pick-lists reports group on" onPress={() => router.push('/settings-lists')} />
+        </View>
 
-        <Text style={s.label}>Travel Day Rate ($)</Text>
-        <NumField value={travelRate} onChangeText={setTravelRate} keyboardType="number-pad" placeholder="same as day rate" />
+        <View style={s.group}>
+          <Row s={s} t={t} icon="archive-outline" label="Backup & Data" hint="Export, import, sample, clear" onPress={() => router.push('/settings-data')} />
+        </View>
 
-        <Text style={s.label}>Standby Day Rate ($)</Text>
-        <NumField value={standbyRate} onChangeText={setStandbyRate} keyboardType="number-pad" placeholder="same as day rate" />
-        <Text style={s.note}>Leave blank to use your default day rate. The log sheet fills the rate by day type.</Text>
-
-        <Text style={s.label}>IRS Mileage Rate ($/mi)</Text>
-        <NumField value={mileageRate} onChangeText={setMileageRate} />
-        <Text style={s.note}>Verify the current rate with the IRS each tax year.</Text>
-
-        <Text style={s.label}>Tax Set-Aside (%)</Text>
-        <NumField value={taxPct} onChangeText={setTaxPct} keyboardType="number-pad" />
-        <Text style={s.note}>A flat planning estimate, not a tax calculation. Confirm with your CPA.</Text>
-
-        <Text style={s.label}>Home State</Text>
-        <StatePicker value={homeState} onChange={setHomeState} />
-
-        <Text style={s.label}>Appearance</Text>
+        <Text style={s.appLabel}>Appearance</Text>
         <View style={s.chipRow}>
           {(['system', 'light', 'dark'] as Appearance[]).map((a) => (
             <Chip
@@ -153,152 +58,7 @@ export default function SettingsScreen() {
             />
           ))}
         </View>
-        <Text style={s.note}>Applies immediately. System follows your phone setting.</Text>
-
-        <Text style={s.label}>Employment</Text>
-        <View style={s.chipRow}>
-          <Chip label="1099 / Contractor" selected={profile.employmentType !== 'w2'} onPress={() => setProfile({ employmentType: '1099' })} />
-          <Chip label="W-2" selected={profile.employmentType === 'w2'} onPress={() => setProfile({ employmentType: 'w2' })} />
-        </View>
-        <Text style={s.note}>W-2 employees cannot deduct unreimbursed expenses federally, so the app labels those costs as out of pocket instead of deductions.</Text>
-
-        <Text style={s.label}>Pay Period</Text>
-        <View style={s.chipRow}>
-          {PAY_PERIODS.map((p) => (
-            <Chip key={p.key} label={p.label} selected={payPeriod === p.key} onPress={() => setPayPeriod(p.key)} />
-          ))}
-        </View>
-
-        <Text style={s.label}>Billing Period Ends</Text>
-        <View style={s.chipRow}>
-          <Chip label="Last Day of Month" selected={(profile.billingCycle || 'calendar') === 'calendar'} onPress={() => setProfile({ billingCycle: 'calendar' })} />
-          <Chip label="Last Sunday of Month" selected={profile.billingCycle === 'last-sunday'} onPress={() => setProfile({ billingCycle: 'last-sunday' })} />
-        </View>
-        <Text style={s.note}>Sets the cutoff for monthly reports and invoices. Last Sunday runs each period from the day after the previous cutoff. Applies immediately.</Text>
-
-        <Text style={s.label}>Payment Terms (days to get paid)</Text>
-        <NumField value={termsDays} onChangeText={setTermsDays} keyboardType="number-pad" />
-        <Text style={s.note}>Days from billing to payment. Net-30 means 30.</Text>
-
-        <Text style={s.label}>Per Diem M&IE ($/day)</Text>
-        <NumField value={perDiemMie} onChangeText={setPerDiemMie} />
-        <Text style={s.note}>GSA FY2026 standard CONUS is $68. Higher-cost areas differ; check gsa.gov/perdiem.</Text>
-
-        <Text style={s.sectionTitle}>Business Details</Text>
-        <Text style={s.note}>Appears on the From block of your invoices. All optional.</Text>
-
-        <Text style={s.label}>Business Name</Text>
-        <TextInput style={s.input} value={bizName} onChangeText={setBizName} placeholder="falls back to your name" placeholderTextColor={t.faint} />
-
-        <Text style={s.label}>Address</Text>
-        <TextInput
-          style={[s.input, s.multiline]}
-          value={bizAddress}
-          onChangeText={setBizAddress}
-          placeholder="street, city, state, zip"
-          placeholderTextColor={t.faint}
-          multiline
-        />
-
-        <Text style={s.label}>Phone</Text>
-        <TextInput style={s.input} value={bizPhone} onChangeText={setBizPhone} keyboardType="phone-pad" placeholder="optional" placeholderTextColor={t.faint} />
-
-        <Text style={s.label}>Email</Text>
-        <TextInput style={s.input} value={bizEmail} onChangeText={setBizEmail} keyboardType="email-address" autoCapitalize="none" placeholder="optional" placeholderTextColor={t.faint} />
-
-        <Text style={s.label}>Payment Instructions</Text>
-        <TextInput
-          style={[s.input, s.multiline]}
-          value={payInstr}
-          onChangeText={setPayInstr}
-          placeholder="e.g. ACH routing/account, or check payable to…"
-          placeholderTextColor={t.faint}
-          multiline
-        />
-
-        <Text style={s.sectionTitle}>Hitch Schedule</Text>
-        <Text style={s.note}>Days on / days off, and the first day of any hitch you know. Powers the calendar, days-home countdown, and year projection.</Text>
-
-        <Text style={s.label}>Days On</Text>
-        <NumField value={hitchOn} onChangeText={setHitchOn} keyboardType="number-pad" placeholder="28" />
-
-        <Text style={s.label}>Days Off</Text>
-        <NumField value={hitchOff} onChangeText={setHitchOff} keyboardType="number-pad" placeholder="14" />
-
-        <Text style={s.label}>First Day of a Hitch</Text>
-        {hitchAnchor ? (
-          <>
-            <DateField value={hitchAnchor} onChange={setHitchAnchor} />
-            <Pressable onPress={() => setHitchAnchor('')}><Text style={[s.note, { color: t.danger }]}>Turn off schedule</Text></Pressable>
-          </>
-        ) : (
-          <Pressable style={s.anchorBtn} onPress={() => setHitchAnchor(new Date().toISOString().slice(0, 10))}>
-            <Text style={s.anchorText}>Set anchor date</Text>
-          </Pressable>
-        )}
-
-        <Pressable style={s.saveBtn} onPress={save}><Text style={s.saveText}>Save</Text></Pressable>
-
-        <Text style={s.sectionTitle}>Clients</Text>
-        <Text style={s.note}>The list you pick from when logging days, expenses, and mileage. Reports group on these.</Text>
-        {clients.length === 0 && <Text style={s.emptyClients}>No clients yet. Add one below or from any log screen.</Text>}
-        {clients.map((c) => (
-          <View key={c} style={s.clientRow}>
-            <Text style={s.clientName}>{c}</Text>
-            <Pressable hitSlop={8} onPress={() => removeClient(c)}>
-              <Ionicons name="trash-outline" size={17} color={t.faint} />
-            </Pressable>
-          </View>
-        ))}
-        <View style={s.addClientRow}>
-          <TextInput
-            style={[s.input, { flex: 1 }]}
-            value={clientDraft}
-            onChangeText={setClientDraft}
-            placeholder="Add a client or staffing house"
-            placeholderTextColor={t.faint}
-            onSubmitEditing={addClientFromDraft}
-            returnKeyType="done"
-          />
-          <Pressable style={s.addClientBtn} onPress={addClientFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
-        </View>
-
-        <Text style={s.sectionTitle}>Projects</Text>
-        <Text style={s.note}>Project names like Manatee or Powernap. Days, expenses, and mileage tag a project, and invoices can split by it.</Text>
-        {projects.length === 0 && <Text style={s.emptyClients}>No projects yet. Add one below or from any log screen.</Text>}
-        {projects.map((p) => (
-          <View key={p} style={s.clientRow}>
-            <Text style={s.clientName}>{p}</Text>
-            <Pressable hitSlop={8} onPress={() => removeProject(p)}>
-              <Ionicons name="trash-outline" size={17} color={t.faint} />
-            </Pressable>
-          </View>
-        ))}
-        <View style={s.addClientRow}>
-          <TextInput
-            style={[s.input, { flex: 1 }]}
-            value={projectDraft}
-            onChangeText={setProjectDraft}
-            placeholder="Add a project"
-            placeholderTextColor={t.faint}
-            onSubmitEditing={addProjectFromDraft}
-            returnKeyType="done"
-          />
-          <Pressable style={s.addClientBtn} onPress={addProjectFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
-        </View>
-
-        <View style={s.devBox}>
-          <Text style={s.devTitle}>Backup</Text>
-          <Pressable style={s.devBtn} onPress={onExportBackup}><Text style={s.devBtnText}>Export Backup (JSON)</Text></Pressable>
-          <Pressable style={s.devBtn} onPress={onImportBackup}><Text style={s.devBtnText}>Import Backup</Text></Pressable>
-          <Text style={s.note}>Save the file to iCloud Drive or email it to yourself. Receipt photos are not included; exported PDFs already carry them.</Text>
-        </View>
-
-        <View style={s.devBox}>
-          <Text style={s.devTitle}>Test Data</Text>
-          <Pressable style={s.devBtn} onPress={() => loadSample()}><Text style={s.devBtnText}>Load Sample Data</Text></Pressable>
-          <Pressable style={s.devBtn} onPress={confirmClear}><Text style={[s.devBtnText, { color: t.danger }]}>Clear All Data</Text></Pressable>
-        </View>
+        <Text style={s.appNote}>Applies immediately. System follows your phone setting.</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -308,25 +68,13 @@ const makeStyles = (t: AppColors) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.bg },
     content: { padding: 16, paddingBottom: 40 },
-    label: { fontSize: 12, color: t.muted, marginTop: 18, marginBottom: 8 },
-    input: { height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, paddingHorizontal: 13, fontSize: 16, color: t.ink, backgroundColor: t.bg },
-    note: { fontSize: 11, color: t.faint, marginTop: 6 },
+    group: { borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 10, overflow: 'hidden', marginBottom: 14 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 13, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.hairline2 },
+    rowIcon: { width: 24, alignItems: 'center' },
+    rowBody: { flex: 1 },
+    rowLabel: { fontSize: 14, color: t.ink },
+    rowHint: { fontSize: 12, color: t.muted, marginTop: 2 },
+    appLabel: { fontSize: 12, color: t.muted, marginTop: 12, marginBottom: 8 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    saveBtn: { backgroundColor: t.ink, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 28 },
-    saveText: { color: t.onInk, fontSize: 14, fontWeight: '500' },
-
-    sectionTitle: { fontSize: 13, fontWeight: '500', color: t.ink, marginTop: 34 },
-    emptyClients: { fontSize: 13, color: t.muted, marginTop: 10 },
-    clientRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline2 },
-    clientName: { fontSize: 14, color: t.ink },
-    addClientRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
-    addClientBtn: { paddingHorizontal: 16, justifyContent: 'center', borderRadius: 8, backgroundColor: t.ink },
-
-    devBox: { marginTop: 32, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.hairline, paddingTop: 16 },
-    devTitle: { fontSize: 12, color: t.faint, marginBottom: 8 },
-    devBtn: { paddingVertical: 12 },
-    devBtnText: { fontSize: 14, color: t.ink },
-    multiline: { height: 88, paddingTop: 12, textAlignVertical: 'top' },
-    anchorBtn: { height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-    anchorText: { fontSize: 14, color: t.accent },
+    appNote: { fontSize: 11, color: t.faint, marginTop: 6 },
   });

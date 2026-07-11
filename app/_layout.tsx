@@ -57,6 +57,13 @@ export default function RootLayout() {
           <Stack.Screen name="mileage" options={{ headerShown: true, title: 'Mileage' }} />
           <Stack.Screen name="certs" options={{ headerShown: true, title: 'Certs & Tickets' }} />
           <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
+          <Stack.Screen name="settings-profile" options={{ headerShown: true, title: 'Profile' }} />
+          <Stack.Screen name="settings-rates" options={{ headerShown: true, title: 'Rates' }} />
+          <Stack.Screen name="settings-billing" options={{ headerShown: true, title: 'Billing' }} />
+          <Stack.Screen name="settings-business" options={{ headerShown: true, title: 'Business Details' }} />
+          <Stack.Screen name="settings-hitch" options={{ headerShown: true, title: 'Hitch Schedule' }} />
+          <Stack.Screen name="settings-lists" options={{ headerShown: true, title: 'Clients & Projects' }} />
+          <Stack.Screen name="settings-data" options={{ headerShown: true, title: 'Backup & Data' }} />
         </Stack>
       </PrivacyProvider>
     </SafeAreaProvider>
