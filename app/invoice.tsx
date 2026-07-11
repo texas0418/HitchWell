@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
+import { Chip } from '../components/Chip';
 import { useStore, CATEGORY_LABEL, DayType } from '../lib/store';
 import { buildInvoiceHtml, InvoiceLine } from '../lib/invoiceHtml';
 import { buildReceiptItems } from '../lib/receiptEmbed';
@@ -28,6 +29,7 @@ export default function InvoiceScreen() {
     `INV-${year}${String(month + 1).padStart(2, '0')}-${String(invoiceCounter).padStart(3, '0')}`
   );
   const [includePerDiem, setIncludePerDiem] = useState(true);
+  const [project, setProject] = useState<string>(''); // '' = all projects
   const [exported, setExported] = useState(false);
 
   const inMonth = (iso: string) => {
@@ -35,9 +37,18 @@ export default function InvoiceScreen() {
     return d.getFullYear() === year && d.getMonth() === month;
   };
 
+  const monthProjects = useMemo(() => {
+    const set = new Set<string>();
+    dayEntries.forEach((d) => { if (inMonth(d.date) && (d.client ?? '') === client && d.project) set.add(d.project); });
+    expenses.forEach((e) => { if (inMonth(e.date) && (e.client ?? '') === client && e.project) set.add(e.project); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [dayEntries, expenses, client, year, month]);
+
+  const matchesProject = (p?: string) => !project || (p ?? '') === project;
+
   const lines = useMemo<InvoiceLine[]>(() => {
     const out: InvoiceLine[] = [];
-    const days = dayEntries.filter((d) => inMonth(d.date) && (d.client ?? '') === client && d.type !== 'off');
+    const days = dayEntries.filter((d) => inMonth(d.date) && (d.client ?? '') === client && d.type !== 'off' && matchesProject(d.project));
 
     // Day-rate lines grouped by type and rate.
     const groups = new Map<string, { type: DayType; rate: number; count: number }>();
@@ -59,12 +70,12 @@ export default function InvoiceScreen() {
     }
 
     // Reimbursable expenses, itemized.
-    const reimb = expenses.filter((e) => inMonth(e.date) && (e.client ?? '') === client && e.reimbursable);
+    const reimb = expenses.filter((e) => inMonth(e.date) && (e.client ?? '') === client && e.reimbursable && matchesProject(e.project));
     for (const e of [...reimb].sort((a, b) => (a.date < b.date ? -1 : 1))) {
       out.push({ desc: `${CATEGORY_LABEL[e.category]}${e.note ? ` — ${e.note}` : ''} (${longDate(e.date)})`, amount: e.amount || 0 });
     }
     return out;
-  }, [dayEntries, expenses, client, year, month, includePerDiem, profile.perDiemMie]);
+  }, [dayEntries, expenses, client, year, month, includePerDiem, project, profile.perDiemMie]);
 
   const total = lines.reduce((sum, l) => sum + l.amount, 0);
   const { end } = monthBounds(year, month);
@@ -72,10 +83,13 @@ export default function InvoiceScreen() {
 
   const onExport = async () => {
     try {
-      const receipts = (await buildReceiptItems(expenses, year, month)).filter((r) => r.client === client);
+      const receipts = (
+        await buildReceiptItems(expenses.filter((e) => matchesProject(e.project)), year, month)
+      ).filter((r) => r.client === client);
       const html = buildInvoiceHtml({
         invoiceNo: invoiceNo.trim() || 'INVOICE',
         client,
+        project: project || undefined,
         profile,
         billDate: end,
         dueDate,
@@ -112,6 +126,18 @@ export default function InvoiceScreen() {
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <Text style={s.head}>{client || 'Unassigned'}</Text>
         <Text style={s.sub}>{monthLabel(year, month)} · Due {longDate(dueDate)}</Text>
+
+        {monthProjects.length > 0 && (
+          <>
+            <Text style={s.label}>Project</Text>
+            <View style={s.chipRow}>
+              <Chip label="All" selected={project === ''} onPress={() => setProject('')} />
+              {monthProjects.map((p) => (
+                <Chip key={p} label={p} selected={project === p} onPress={() => setProject(p)} />
+              ))}
+            </View>
+          </>
+        )}
 
         <Text style={s.label}>Invoice Number</Text>
         <TextInput style={s.input} value={invoiceNo} onChangeText={setInvoiceNo} autoCapitalize="characters" />
@@ -159,6 +185,7 @@ const makeStyles = (t: AppColors) =>
     sub: { fontSize: 12, color: t.muted, marginTop: 2, marginBottom: 6 },
     label: { fontSize: 12, color: t.muted, marginTop: 16, marginBottom: 8 },
     input: { height: 44, borderWidth: StyleSheet.hairlineWidth, borderColor: t.border, borderRadius: 8, paddingHorizontal: 13, fontSize: 16, color: t.ink, backgroundColor: t.bg },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18 },
     switchLabel: { fontSize: 14, color: t.ink },
 

@@ -15,7 +15,7 @@ export default function SettingsScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, appearance, setAppearance } = useStore();
+  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, projects, addProject, removeProject, appearance, setAppearance } = useStore();
 
   const [name, setName] = useState(profile.name);
   const [rate, setRate] = useState(String(profile.defaultDayRate));
@@ -36,6 +36,14 @@ export default function SettingsScreen() {
   const [hitchOff, setHitchOff] = useState(String(profile.hitchOffDays || ''));
   const [hitchAnchor, setHitchAnchor] = useState(profile.hitchAnchor);
   const [clientDraft, setClientDraft] = useState('');
+  const [projectDraft, setProjectDraft] = useState('');
+
+  const addProjectFromDraft = () => {
+    const n = projectDraft.trim();
+    if (!n) return;
+    addProject(n);
+    setProjectDraft('');
+  };
 
   const addClientFromDraft = () => {
     const n = clientDraft.trim();
@@ -114,6 +122,13 @@ export default function SettingsScreen() {
           ))}
         </View>
         <Text style={s.note}>Applies immediately. System follows your phone setting.</Text>
+
+        <Text style={s.label}>Employment</Text>
+        <View style={s.chipRow}>
+          <Chip label="1099 / Contractor" selected={profile.employmentType !== 'w2'} onPress={() => setProfile({ employmentType: '1099' })} />
+          <Chip label="W-2" selected={profile.employmentType === 'w2'} onPress={() => setProfile({ employmentType: 'w2' })} />
+        </View>
+        <Text style={s.note}>W-2 employees cannot deduct unreimbursed expenses federally, so the app labels those costs as out of pocket instead of deductions.</Text>
 
         <Text style={s.label}>Pay Period</Text>
         <View style={s.chipRow}>
@@ -207,6 +222,30 @@ export default function SettingsScreen() {
             returnKeyType="done"
           />
           <Pressable style={s.addClientBtn} onPress={addClientFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
+        </View>
+
+        <Text style={s.sectionTitle}>Projects</Text>
+        <Text style={s.note}>Project names like Manatee or Powernap. Days, expenses, and mileage tag a project, and invoices can split by it.</Text>
+        {projects.length === 0 && <Text style={s.emptyClients}>No projects yet. Add one below or from any log screen.</Text>}
+        {projects.map((p) => (
+          <View key={p} style={s.clientRow}>
+            <Text style={s.clientName}>{p}</Text>
+            <Pressable hitSlop={8} onPress={() => removeProject(p)}>
+              <Ionicons name="trash-outline" size={17} color={t.faint} />
+            </Pressable>
+          </View>
+        ))}
+        <View style={s.addClientRow}>
+          <TextInput
+            style={[s.input, { flex: 1 }]}
+            value={projectDraft}
+            onChangeText={setProjectDraft}
+            placeholder="Add a project"
+            placeholderTextColor={t.faint}
+            onSubmitEditing={addProjectFromDraft}
+            returnKeyType="done"
+          />
+          <Pressable style={s.addClientBtn} onPress={addProjectFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
         </View>
 
         <View style={s.devBox}>

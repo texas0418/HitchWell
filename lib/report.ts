@@ -138,7 +138,7 @@ export function clientLabel(client: string): string {
 }
 
 // Plain-text version for the share sheet. PDF export comes later.
-export function buildReportText(r: MonthlyReport): string {
+export function buildReportText(r: MonthlyReport, deductWord = 'Your deductions'): string {
   const L: string[] = [];
   L.push(`HitchWell — ${monthLabel(r.year, r.month)}`);
   L.push(`Billed ${longDateYear(r.billingDate)} · Expected pay ${longDateYear(r.expectedPayDate)}`);
@@ -157,7 +157,7 @@ export function buildReportText(r: MonthlyReport): string {
     }
     if (c.miles > 0) L.push(`  Mileage: ${num(c.miles)} mi (est. deduction ${money(c.mileageDeduction)})`);
     L.push(`  Invoice total: ${money(c.invoiceTotal)}`);
-    if (c.deductible > 0) L.push(`  Your deductions (not billed): ${money(c.deductible)}`);
+    if (c.deductible > 0) L.push(`  ${deductWord} (not billed): ${money(c.deductible)}`);
     L.push('');
   }
 
@@ -166,7 +166,7 @@ export function buildReportText(r: MonthlyReport): string {
   if (r.totals.perDiem > 0) L.push(`  Per diem (M&IE): ${money(r.totals.perDiem)}`);
   L.push(`  Reimbursable: ${money(r.totals.reimbursable)}`);
   L.push(`  Invoice total: ${money(r.totals.invoiceTotal)}`);
-  L.push(`  Your deductions: ${money(r.totals.deductible)}`);
+  L.push(`  ${deductWord}: ${money(r.totals.deductible)}`);
   L.push(`  Mileage: ${num(r.totals.miles)} mi (${money(r.totals.mileageDeduction)})`);
   return L.join('\n');
 }

@@ -12,6 +12,7 @@ const esc = (s: string) =>
 
 export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: ReceiptItem[] = []): string {
   const preparedBy = profile.name?.trim() ? esc(profile.name.trim()) : '';
+  const deductWord = profile.employmentType === 'w2' ? 'Out of pocket' : 'Your deductions';
 
   const clientBlocks = r.clients
     .map((c) => {
@@ -57,7 +58,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: Re
               ${c.perDiem > 0 ? `<tr><td>Per diem M&amp;IE (${c.perDiemDays} days)</td><td class="amt">${money(c.perDiem)}</td></tr>` : ''}
               ${c.reimbursable > 0 ? `<tr class="head"><td>Reimbursable</td><td class="amt">${money(c.reimbursable)}</td></tr>${catRows}` : ''}
               ${c.miles > 0 ? `<tr><td>Mileage</td><td class="amt">${num(c.miles)} mi (${money(c.mileageDeduction)} est.)</td></tr>` : ''}
-              ${c.deductible > 0 ? `<tr class="muted"><td>Your deductions (not billed)</td><td class="amt">${money(c.deductible)}</td></tr>` : ''}
+              ${c.deductible > 0 ? `<tr class="muted"><td>${deductWord} (not billed)</td><td class="amt">${money(c.deductible)}</td></tr>` : ''}
             </tbody>
           </table>
           ${receiptBlock}
@@ -115,7 +116,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: Re
         ${r.totals.perDiem > 0 ? `<tr><td>Per diem M&amp;IE</td><td class="amt">${money(r.totals.perDiem)}</td></tr>` : ''}
         <tr><td>Reimbursable</td><td class="amt">${money(r.totals.reimbursable)}</td></tr>
         <tr class="strong"><td>Invoice total</td><td class="amt">${money(r.totals.invoiceTotal)}</td></tr>
-        <tr class="muted"><td>Your deductions</td><td class="amt">${money(r.totals.deductible)}</td></tr>
+        <tr class="muted"><td>${deductWord}</td><td class="amt">${money(r.totals.deductible)}</td></tr>
         <tr class="muted"><td>Mileage</td><td class="amt">${num(r.totals.miles)} mi (${money(r.totals.mileageDeduction)})</td></tr>
       </tbody>
     </table>

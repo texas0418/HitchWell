@@ -10,29 +10,29 @@ export function buildCSV(dayEntries: DayEntry[], expenses: Expense[], mileage: M
   lines.push(`HitchWell export,${year}`);
   lines.push('');
   lines.push('DAYS');
-  lines.push('date,type,rate,state,per_diem,per_diem_mie,client,location');
+  lines.push('date,type,rate,state,per_diem,per_diem_mie,client,project,location');
   dayEntries
     .filter((d) => inYear(d.date))
     .sort((a, b) => (a.date < b.date ? -1 : 1))
-    .forEach((d) => lines.push(`${d.date},${d.type},${d.rate},${d.state},${d.perDiem ? 'yes' : 'no'},${d.perDiem ? (d.perDiemAmount ?? '') : ''},"${d.client ?? ''}","${d.location}"`));
+    .forEach((d) => lines.push(`${d.date},${d.type},${d.rate},${d.state},${d.perDiem ? 'yes' : 'no'},${d.perDiem ? (d.perDiemAmount ?? '') : ''},"${d.client ?? ''}","${d.project ?? ''}","${d.location}"`));
 
   lines.push('');
   lines.push('EXPENSES');
-  lines.push('date,category,reimbursable,amount,client,note');
+  lines.push('date,category,reimbursable,amount,client,project,note');
   expenses
     .filter((e) => inYear(e.date))
     .sort((a, b) => (a.date < b.date ? -1 : 1))
     .forEach((e) =>
-      lines.push(`${e.date},${e.category},${e.reimbursable ? 'yes' : 'no'},${e.amount},"${e.client ?? ''}","${e.note ?? ''}"`)
+      lines.push(`${e.date},${e.category},${e.reimbursable ? 'yes' : 'no'},${e.amount},"${e.client ?? ''}","${e.project ?? ''}","${e.note ?? ''}"`)
     );
 
   lines.push('');
   lines.push('MILEAGE');
-  lines.push('date,miles,client,purpose');
+  lines.push('date,miles,client,project,purpose');
   mileage
     .filter((m) => inYear(m.date))
     .sort((a, b) => (a.date < b.date ? -1 : 1))
-    .forEach((m) => lines.push(`${m.date},${m.miles},"${m.client ?? ''}","${m.purpose}"`));
+    .forEach((m) => lines.push(`${m.date},${m.miles},"${m.client ?? ''}","${m.project ?? ''}","${m.purpose}"`));
 
   return lines.join('\n');
 }

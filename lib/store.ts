@@ -17,6 +17,7 @@ export type DayEntry = {
   perDiem: boolean;
   perDiemAmount?: number;  // M&IE dollars applied that day (75% on travel days)
   client?: string;
+  project?: string;        // e.g. Manatee, Powernap — canonical pick-list
 };
 
 export type ExpenseCategory =
@@ -54,6 +55,7 @@ export type Expense = {
   amount: number;
   reimbursable: boolean;   // true = fronted, paid back by employer (not a deduction)
   client?: string;
+  project?: string;
   receiptUri?: string;     // local file path to the receipt photo, if attached
   note?: string;
 };
@@ -64,6 +66,7 @@ export type Mileage = {
   miles: number;
   purpose: string;
   client?: string;
+  project?: string;
 };
 
 export type Cert = {
@@ -91,6 +94,7 @@ export type Profile = {
   payPeriod: PayPeriod;
   paymentTermsDays: number;  // days from billing to payment, e.g. net-30
   perDiemMie: number;        // default daily M&IE (GSA FY2026 standard = 68)
+  employmentType: 'w2' | '1099';  // reframes deduction language app-wide
   businessName: string;      // invoice From block; falls back to name
   businessAddress: string;   // multi-line
   businessPhone: string;
@@ -112,6 +116,7 @@ type State = {
   appearance: Appearance;
   invoiceCounter: number;
   clients: string[];
+  projects: string[];
   dayEntries: DayEntry[];
   expenses: Expense[];
   mileage: Mileage[];
@@ -122,6 +127,8 @@ type State = {
   bumpInvoiceCounter: () => void;
   addClient: (name: string) => void;
   removeClient: (name: string) => void;
+  addProject: (name: string) => void;
+  removeProject: (name: string) => void;
 
   addDayEntry: (e: Omit<DayEntry, 'id'>) => void;
   updateDayEntry: (id: string, patch: Partial<DayEntry>) => void;
@@ -153,6 +160,7 @@ const defaultProfile: Profile = {
   payPeriod: 'monthly',
   paymentTermsDays: 30,
   perDiemMie: 68,
+  employmentType: '1099',
   businessName: '',
   businessAddress: '',
   businessPhone: '',
@@ -173,6 +181,7 @@ export const useStore = create<State>()(
       appearance: 'system' as Appearance,
       invoiceCounter: 1,
       clients: [],
+      projects: [],
       dayEntries: [],
       expenses: [],
       mileage: [],
@@ -189,6 +198,14 @@ export const useStore = create<State>()(
           return { clients: [...s.clients, n].sort((a, b) => a.localeCompare(b)) };
         }),
       removeClient: (name) => set((s) => ({ clients: s.clients.filter((c) => c !== name) })),
+
+      addProject: (name) =>
+        set((s) => {
+          const n = name.trim();
+          if (!n || s.projects.some((p) => p.toLowerCase() === n.toLowerCase())) return {};
+          return { projects: [...s.projects, n].sort((a, b) => a.localeCompare(b)) };
+        }),
+      removeProject: (name) => set((s) => ({ projects: s.projects.filter((p) => p !== name) })),
 
       addDayEntry: (e) => set((s) => ({ dayEntries: [{ ...e, id: id() }, ...s.dayEntries] })),
       updateDayEntry: (eid, patch) =>
@@ -216,22 +233,23 @@ export const useStore = create<State>()(
           };
           return {
             clients: ['AUT Consulting', 'Permian Field Services'],
+            projects: ['Manatee'],
             dayEntries: [
-              { id: id(), date: iso(1), type: 'worked', rate: 525, state: 'TX', location: 'Midland, TX', perDiem: true, perDiemAmount: 68, client: 'AUT Consulting' },
-              { id: id(), date: iso(2), type: 'travel', rate: 200, state: '', location: 'mobe', perDiem: false, client: 'AUT Consulting' },
+              { id: id(), date: iso(1), type: 'worked', rate: 525, state: 'TX', location: 'Midland, TX', perDiem: true, perDiemAmount: 68, client: 'AUT Consulting', project: 'Manatee' },
+              { id: id(), date: iso(2), type: 'travel', rate: 200, state: '', location: 'mobe', perDiem: false, client: 'AUT Consulting', project: 'Manatee' },
               { id: id(), date: iso(3), type: 'standby', rate: 300, state: 'NM', location: 'weather', perDiem: true, perDiemAmount: 68, client: 'Permian Field Services' },
-              { id: id(), date: iso(4), type: 'worked', rate: 525, state: 'TX', location: 'Midland, TX', perDiem: true, perDiemAmount: 68, client: 'AUT Consulting' },
+              { id: id(), date: iso(4), type: 'worked', rate: 525, state: 'TX', location: 'Midland, TX', perDiem: true, perDiemAmount: 68, client: 'AUT Consulting', project: 'Manatee' },
               { id: id(), date: iso(5), type: 'off', rate: 0, state: '', location: '', perDiem: false },
               { id: id(), date: iso(6), type: 'worked', rate: 525, state: 'NM', location: 'Hobbs, NM', perDiem: true, perDiemAmount: 68, client: 'Permian Field Services' },
             ],
             expenses: [
-              { id: id(), date: iso(2), category: 'airfare', amount: 420, reimbursable: true, client: 'AUT Consulting', note: 'IAH to MAF' },
-              { id: id(), date: iso(2), category: 'rideshare', amount: 32, reimbursable: true, client: 'AUT Consulting', note: 'airport to yard' },
+              { id: id(), date: iso(2), category: 'airfare', amount: 420, reimbursable: true, client: 'AUT Consulting', project: 'Manatee', note: 'IAH to MAF' },
+              { id: id(), date: iso(2), category: 'rideshare', amount: 32, reimbursable: true, client: 'AUT Consulting', project: 'Manatee', note: 'airport to yard' },
               { id: id(), date: iso(3), category: 'lodging', amount: 110, reimbursable: true, client: 'Permian Field Services', note: 'motel' },
               { id: id(), date: iso(1), category: 'fuel', amount: 84, reimbursable: false, note: 'diesel' },
               { id: id(), date: iso(4), category: 'meals', amount: 38, reimbursable: false },
             ],
-            mileage: [{ id: id(), date: iso(2), miles: 412, purpose: 'home to location', client: 'AUT Consulting' }],
+            mileage: [{ id: id(), date: iso(2), miles: 412, purpose: 'home to location', client: 'AUT Consulting', project: 'Manatee' }],
             certs: [
               { id: id(), name: 'H2S Alive', expiry: iso(-23) },
               { id: id(), name: 'TWIC', expiry: iso(-120) },
@@ -240,17 +258,18 @@ export const useStore = create<State>()(
           };
         }),
 
-      clearAll: () => set(() => ({ clients: [], dayEntries: [], expenses: [], mileage: [], certs: [] })),
+      clearAll: () => set(() => ({ clients: [], projects: [], dayEntries: [], expenses: [], mileage: [], certs: [] })),
     }),
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 11,
+      version: 13,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;
         if (!persisted.appearance) persisted.appearance = 'system';
         if (!persisted.invoiceCounter) persisted.invoiceCounter = 1;
+        if (!Array.isArray(persisted.projects)) persisted.projects = [];
         persisted.profile = { ...defaultProfile, ...(persisted.profile ?? {}) };
         // Older expenses had no reimbursable flag; default them to deductible.
         if (Array.isArray(persisted.expenses)) {

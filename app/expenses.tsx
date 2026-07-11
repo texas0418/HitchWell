@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { ClientField } from '../components/ClientField';
+import { ProjectField } from '../components/ProjectField';
 import { AmountText } from '../components/AmountText';
 import { useStore, ExpenseCategory, EXPENSE_CATEGORIES, CATEGORY_LABEL } from '../lib/store';
 import { saveReceipt, deleteReceipt } from '../lib/receipts';
@@ -20,7 +21,9 @@ const DEFAULT_REIMBURSABLE: Record<ExpenseCategory, boolean> = EXPENSE_CATEGORIE
 export default function ExpensesScreen() {
   const t = useTheme();
   const styles = React.useMemo(() => makeStyles(t), [t]);
-  const { expenses, addExpense, removeExpense } = useStore();
+  const { expenses, addExpense, removeExpense, profile } = useStore();
+  const isW2 = profile.employmentType === 'w2';
+  const deductWord = isW2 ? 'Out of pocket' : 'Your deductions';
   const year = new Date().getFullYear();
   const reimb = calc.reimbursableTotal(expenses, year);
   const deduct = calc.deductibleTotal(expenses, year);
@@ -31,6 +34,7 @@ export default function ExpensesScreen() {
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [client, setClient] = useState('');
+  const [project, setProject] = useState('');
   const [receiptUri, setReceiptUri] = useState('');
 
   const sorted = [...expenses].sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -69,13 +73,13 @@ export default function ExpensesScreen() {
   };
 
   const resetForm = () => {
-    setAmount(''); setNote(''); setClient(''); setReceiptUri(''); setOpen(false);
+    setAmount(''); setNote(''); setClient(''); setProject(''); setReceiptUri(''); setOpen(false);
   };
 
   const add = () => {
     const amt = Number(amount) || 0;
     if (amt <= 0) return;
-    addExpense({ date: todayISO(), category: cat, amount: amt, reimbursable, client: client || undefined, receiptUri: receiptUri || undefined, note: note.trim() });
+    addExpense({ date: todayISO(), category: cat, amount: amt, reimbursable, client: client || undefined, project: project || undefined, receiptUri: receiptUri || undefined, note: note.trim() });
     resetForm();
   };
 
@@ -93,7 +97,7 @@ export default function ExpensesScreen() {
             <AmountText style={[styles.totalValue, { color: t.accent }]}>{money(reimb)}</AmountText>
           </View>
           <View style={styles.totalCard}>
-            <Text style={styles.totalLabel}>Your deductions</Text>
+            <Text style={styles.totalLabel}>{deductWord}</Text>
             <AmountText style={styles.totalValue}>{money(deduct)}</AmountText>
           </View>
         </View>
@@ -112,6 +116,8 @@ export default function ExpensesScreen() {
             <TextInput style={styles.input} value={note} onChangeText={setNote} placeholder="optional" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Client / job</Text>
             <ClientField value={client} onChange={setClient} />
+            <Text style={styles.label}>Project</Text>
+            <ProjectField value={project} onChange={setProject} />
 
             <Text style={styles.label}>Receipt</Text>
             {receiptUri ? (
@@ -138,7 +144,7 @@ export default function ExpensesScreen() {
             <View style={styles.switchRow}>
               <View>
                 <Text style={styles.switchLabel}>Reimbursable</Text>
-                <Text style={styles.switchHint}>{reimbursable ? 'Goes on your expense report' : 'Your own deduction'}</Text>
+                <Text style={styles.switchHint}>{reimbursable ? 'Goes on your expense report' : isW2 ? 'Your own cost (not deductible as W-2)' : 'Your own deduction'}</Text>
               </View>
               <Switch value={reimbursable} onValueChange={setReimbursable} trackColor={{ true: t.accent }} />
             </View>
@@ -161,10 +167,10 @@ export default function ExpensesScreen() {
               <View style={styles.rowMeta}>
                 <View style={[styles.tag, e.reimbursable ? styles.tagReimb : styles.tagDeduct]}>
                   <Text style={[styles.tagText, e.reimbursable ? styles.tagTextReimb : styles.tagTextDeduct]}>
-                    {e.reimbursable ? 'Reimbursable' : 'Deduction'}
+                    {e.reimbursable ? 'Reimbursable' : isW2 ? 'Out of pocket' : 'Deduction'}
                   </Text>
                 </View>
-                <Text style={styles.rowSub}>{[longDate(e.date), e.client].filter(Boolean).join(' · ')}</Text>
+                <Text style={styles.rowSub}>{[longDate(e.date), e.client, e.project].filter(Boolean).join(' · ')}</Text>
               </View>
             </View>
             <AmountText style={styles.amount}>{money(e.amount)}</AmountText>

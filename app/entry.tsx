@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { ClientField } from '../components/ClientField';
+import { ProjectField } from '../components/ProjectField';
 import { DateField } from '../components/DateField';
 import { NumField } from '../components/NumField';
 import { StatePicker } from '../components/StatePicker';
@@ -39,6 +40,7 @@ export default function EntryScreen() {
   const [state, setState] = useState(existing?.state ?? profile.homeState);
   const [location, setLocation] = useState(existing?.location ?? '');
   const [client, setClient] = useState(existing?.client ?? '');
+  const [project, setProject] = useState(existing?.project ?? '');
   const [perDiem, setPerDiem] = useState(existing?.perDiem ?? true);
   const [perDiemAmt, setPerDiemAmt] = useState(String(existing?.perDiemAmount ?? profile.perDiemMie));
 
@@ -51,6 +53,7 @@ export default function EntryScreen() {
     state: isOff ? '' : state,
     location: location.trim(),
     client: client.trim() || undefined,
+    project: project.trim() || undefined,
     perDiem: isOff ? false : perDiem,
     perDiemAmount: !isOff && perDiem ? Number(perDiemAmt) || 0 : undefined,
   });
@@ -194,6 +197,9 @@ export default function EntryScreen() {
 
           <Text style={s.label}>Client / Staffing House</Text>
           <ClientField value={client} onChange={setClient} />
+
+          <Text style={s.label}>Project</Text>
+          <ProjectField value={project} onChange={setProject} />
 
           <View style={s.switchRow}>
             <Text style={s.switchLabel}>Per Diem {range && rangeDays > 1 ? 'Days' : 'Day'}</Text>

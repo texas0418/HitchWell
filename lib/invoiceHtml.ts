@@ -13,13 +13,14 @@ const esc = (s: string) =>
 export function buildInvoiceHtml(opts: {
   invoiceNo: string;
   client: string;
+  project?: string;
   profile: Profile;
   billDate: string;   // ISO
   dueDate: string;    // ISO
   lines: InvoiceLine[];
   receipts: ReceiptItem[];
 }): string {
-  const { invoiceNo, client, profile, billDate, dueDate, lines, receipts } = opts;
+  const { invoiceNo, client, project, profile, billDate, dueDate, lines, receipts } = opts;
   const total = lines.reduce((s, l) => s + l.amount, 0);
   const fromName = (profile.businessName || profile.name || 'Contractor').trim();
   const fromDetails = [profile.businessAddress, profile.businessPhone, profile.businessEmail]
@@ -77,7 +78,7 @@ export function buildInvoiceHtml(opts: {
 
   <div class="parties">
     <div class="party"><h3>From</h3><div>${esc(fromName)}</div>${fromDetails ? `<p class="det">${fromDetails}</p>` : ''}</div>
-    <div class="party"><h3>Bill to</h3><div>${esc(client || 'Unassigned')}</div></div>
+    <div class="party"><h3>Bill to</h3><div>${esc(client || 'Unassigned')}</div>${project ? `<p class="det">Project: ${esc(project)}</p>` : ''}</div>
   </div>
 
   <table>

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { ClientField } from '../components/ClientField';
+import { ProjectField } from '../components/ProjectField';
 import { useStore } from '../lib/store';
 import * as calc from '../lib/calc';
 import { money, num, todayISO, longDate } from '../lib/format';
@@ -21,14 +22,15 @@ export default function MileageScreen() {
   const [miles, setMiles] = useState('');
   const [purpose, setPurpose] = useState('');
   const [client, setClient] = useState('');
+  const [project, setProject] = useState('');
 
   const sorted = [...mileage].sort((a, b) => (a.date < b.date ? 1 : -1));
 
   const add = () => {
     const m = Number(miles) || 0;
     if (m <= 0) return;
-    addMileage({ date: todayISO(), miles: m, purpose: purpose.trim(), client: client || undefined });
-    setMiles(''); setPurpose(''); setClient(''); setOpen(false);
+    addMileage({ date: todayISO(), miles: m, purpose: purpose.trim(), client: client || undefined, project: project || undefined });
+    setMiles(''); setPurpose(''); setClient(''); setProject(''); setOpen(false);
   };
 
   return (
@@ -40,7 +42,7 @@ export default function MileageScreen() {
             <Text style={styles.sumValue}>{num(totalMiles)}</Text>
           </View>
           <View>
-            <Text style={styles.sumLabel}>Est. deduction</Text>
+            <Text style={styles.sumLabel}>{profile.employmentType === 'w2' ? 'Est. value (not deductible as W-2)' : 'Est. deduction'}</Text>
             <AmountText style={styles.sumValue}>{money(deduction)}</AmountText>
           </View>
         </View>
@@ -54,6 +56,8 @@ export default function MileageScreen() {
             <TextInput style={styles.input} value={purpose} onChangeText={setPurpose} placeholder="e.g. home to location" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Client / job</Text>
             <ClientField value={client} onChange={setClient} />
+            <Text style={styles.label}>Project</Text>
+            <ProjectField value={project} onChange={setProject} />
             <Pressable style={styles.addBtn} onPress={add}><Text style={styles.addText}>Add trip</Text></Pressable>
           </View>
         ) : (
@@ -67,7 +71,7 @@ export default function MileageScreen() {
           <View key={m.id} style={styles.row}>
             <View style={styles.rowBody}>
               <Text style={styles.rowTitle}>{num(m.miles)} mi{m.purpose ? ` · ${m.purpose}` : ''}</Text>
-              <Text style={styles.rowSub}>{[longDate(m.date), m.client].filter(Boolean).join(' · ')}</Text>
+              <Text style={styles.rowSub}>{[longDate(m.date), m.client, m.project].filter(Boolean).join(' · ')}</Text>
             </View>
             <Pressable hitSlop={8} onPress={() => removeMileage(m.id)}><Ionicons name="trash-outline" size={18} color={t.faint} /></Pressable>
           </View>

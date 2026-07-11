@@ -19,6 +19,7 @@ export default function ReportScreen() {
   const styles = React.useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
   const { dayEntries, expenses, mileage, profile } = useStore();
+  const deductWord = profile.employmentType === 'w2' ? 'Out of pocket' : 'Your deductions';
 
   const now = new Date();
   const [ym, setYm] = useState({ year: now.getFullYear(), month: now.getMonth() });
@@ -59,7 +60,7 @@ export default function ReportScreen() {
 
   const onShareText = async () => {
     try {
-      await Share.share({ message: buildReportText(report), title: `HitchWell ${monthLabel(ym.year, ym.month)}` });
+      await Share.share({ message: buildReportText(report, deductWord), title: `HitchWell ${monthLabel(ym.year, ym.month)}` });
     } catch {
       // cancelled or unavailable
     }
@@ -120,7 +121,7 @@ export default function ReportScreen() {
                 )}
 
                 {c.deductible > 0 && (
-                  <View style={styles.line}><Text style={styles.kMuted}>Your deductions (not billed)</Text><AmountText style={styles.vMuted}>{money(c.deductible)}</AmountText></View>
+                  <View style={styles.line}><Text style={styles.kMuted}>{deductWord} (not billed)</Text><AmountText style={styles.vMuted}>{money(c.deductible)}</AmountText></View>
                 )}
                 <Pressable onPress={() => router.push(`/invoice?client=${encodeURIComponent(c.client)}&year=${ym.year}&month=${ym.month}`)}>
                   <Text style={styles.invoiceLink}>Create Invoice →</Text>
@@ -136,7 +137,7 @@ export default function ReportScreen() {
               )}
               <View style={styles.line}><Text style={styles.k}>Reimbursable</Text><AmountText style={styles.v}>{money(report.totals.reimbursable)}</AmountText></View>
               <View style={styles.line}><Text style={styles.kStrong}>Invoice total</Text><AmountText style={styles.vStrong}>{money(report.totals.invoiceTotal)}</AmountText></View>
-              <View style={styles.line}><Text style={styles.kMuted}>Your deductions</Text><AmountText style={styles.vMuted}>{money(report.totals.deductible)}</AmountText></View>
+              <View style={styles.line}><Text style={styles.kMuted}>{deductWord}</Text><AmountText style={styles.vMuted}>{money(report.totals.deductible)}</AmountText></View>
               <View style={styles.line}><Text style={styles.kMuted}>Mileage</Text><Text style={styles.vMuted}>{num(report.totals.miles)} mi</Text></View>
             </View>
 
