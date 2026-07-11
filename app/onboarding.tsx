@@ -17,9 +17,10 @@ export default function Onboarding() {
   const [rate, setRate] = useState('525');
   const [homeState, setHomeState] = useState('TX');
   const [payPeriod, setPayPeriod] = useState<PayPeriod>('monthly');
+  const [employmentType, setEmploymentType] = useState<'1099' | 'w2'>('1099');
 
   const start = () => {
-    setProfile({ defaultDayRate: Number(rate) || 0, homeState, payPeriod });
+    setProfile({ defaultDayRate: Number(rate) || 0, homeState, payPeriod, employmentType });
     setOnboarded(true);
     router.replace('/');
   };
@@ -35,6 +36,13 @@ export default function Onboarding() {
 
         <Text style={s.label}>Home State</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
+
+        <Text style={s.label}>How Are You Paid?</Text>
+        <View style={s.chipRow}>
+          <Chip label="1099 / Contractor" selected={employmentType === '1099'} onPress={() => setEmploymentType('1099')} />
+          <Chip label="W-2 Employee" selected={employmentType === 'w2'} onPress={() => setEmploymentType('w2')} />
+        </View>
+        <Text style={s.note}>Sets how the app talks about unreimbursed expenses. W-2 employees can't deduct them federally.</Text>
 
         <Text style={s.label}>Pay Period</Text>
         <View style={s.chipRow}>

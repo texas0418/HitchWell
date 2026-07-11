@@ -10,12 +10,44 @@ import { DateField } from '../components/DateField';
 import { StatePicker } from '../components/StatePicker';
 import { useStore, PayPeriod, PAY_PERIODS, Appearance } from '../lib/store';
 import { clearAllReceipts } from '../lib/receipts';
+import { exportBackup, pickBackupFile } from '../lib/backup';
 
 export default function SettingsScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
-  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, projects, addProject, removeProject, appearance, setAppearance } = useStore();
+  const { profile, setProfile, loadSample, clearAll, clients, addClient, removeClient, projects, addProject, removeProject, appearance, setAppearance, importAll } = useStore();
+
+  const onExportBackup = () => {
+    const s = useStore.getState();
+    exportBackup({
+      profile: s.profile,
+      dayEntries: s.dayEntries,
+      expenses: s.expenses,
+      mileage: s.mileage,
+      certs: s.certs,
+      clients: s.clients,
+      projects: s.projects,
+      invoiceCounter: s.invoiceCounter,
+    });
+  };
+
+  const onImportBackup = async () => {
+    const picked = await pickBackupFile();
+    if (picked === 'needs-build') {
+      Alert.alert('Needs an app update', 'Importing uses a component added after this build. Install the next app build to enable it. Export works now.');
+      return;
+    }
+    if (!picked) return;
+    Alert.alert(
+      'Replace all data?',
+      `This replaces everything on this device with the backup from ${picked.exportedAt.slice(0, 10)}. Receipt photos are not part of backups.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Replace', style: 'destructive', onPress: () => importAll(picked.data) },
+      ]
+    );
+  };
 
   const [name, setName] = useState(profile.name);
   const [rate, setRate] = useState(String(profile.defaultDayRate));
@@ -253,6 +285,13 @@ export default function SettingsScreen() {
             returnKeyType="done"
           />
           <Pressable style={s.addClientBtn} onPress={addProjectFromDraft}><Text style={s.saveText}>Add</Text></Pressable>
+        </View>
+
+        <View style={s.devBox}>
+          <Text style={s.devTitle}>Backup</Text>
+          <Pressable style={s.devBtn} onPress={onExportBackup}><Text style={s.devBtnText}>Export Backup (JSON)</Text></Pressable>
+          <Pressable style={s.devBtn} onPress={onImportBackup}><Text style={s.devBtnText}>Import Backup</Text></Pressable>
+          <Text style={s.note}>Save the file to iCloud Drive or email it to yourself. Receipt photos are not included; exported PDFs already carry them.</Text>
         </View>
 
         <View style={s.devBox}>

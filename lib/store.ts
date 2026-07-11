@@ -148,6 +148,7 @@ type State = {
 
   loadSample: () => void;
   clearAll: () => void;
+  importAll: (data: Record<string, unknown>) => void;
 };
 
 const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -261,6 +262,28 @@ export const useStore = create<State>()(
         }),
 
       clearAll: () => set(() => ({ clients: [], projects: [], dayEntries: [], expenses: [], mileage: [], certs: [] })),
+
+      // Replaces user data from a backup file. Unknown keys are ignored;
+      // missing keys keep their current values. Receipt URIs from another
+      // device won't resolve, so they're stripped on import.
+      importAll: (data) =>
+        set((s) => {
+          const d = data as Partial<State>;
+          const expenses = Array.isArray(d.expenses)
+            ? d.expenses.map((e) => ({ ...e, receiptUri: undefined }))
+            : s.expenses;
+          return {
+            profile: d.profile ? { ...defaultProfile, ...d.profile } : s.profile,
+            dayEntries: Array.isArray(d.dayEntries) ? d.dayEntries : s.dayEntries,
+            expenses,
+            mileage: Array.isArray(d.mileage) ? d.mileage : s.mileage,
+            certs: Array.isArray(d.certs) ? d.certs : s.certs,
+            clients: Array.isArray(d.clients) ? d.clients : s.clients,
+            projects: Array.isArray(d.projects) ? d.projects : s.projects,
+            invoiceCounter: typeof d.invoiceCounter === 'number' ? d.invoiceCounter : s.invoiceCounter,
+            onboarded: true,
+          };
+        }),
     }),
     {
       name: 'hitchwell-store',
