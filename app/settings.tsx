@@ -137,6 +137,13 @@ export default function SettingsScreen() {
           ))}
         </View>
 
+        <Text style={s.label}>Billing Period Ends</Text>
+        <View style={s.chipRow}>
+          <Chip label="Last Day of Month" selected={(profile.billingCycle || 'calendar') === 'calendar'} onPress={() => setProfile({ billingCycle: 'calendar' })} />
+          <Chip label="Last Sunday of Month" selected={profile.billingCycle === 'last-sunday'} onPress={() => setProfile({ billingCycle: 'last-sunday' })} />
+        </View>
+        <Text style={s.note}>Sets the cutoff for monthly reports and invoices. Last Sunday runs each period from the day after the previous cutoff. Applies immediately.</Text>
+
         <Text style={s.label}>Payment Terms (days to get paid)</Text>
         <NumField value={termsDays} onChangeText={setTermsDays} keyboardType="number-pad" />
         <Text style={s.note}>Days from billing to payment. Net-30 means 30.</Text>

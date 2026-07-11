@@ -1,5 +1,5 @@
 import { DayEntry, Expense, Mileage, Profile, ExpenseCategory, CATEGORY_LABEL } from './store';
-import { fromISO, monthBounds, addDays, monthLabel, longDateYear } from './format';
+import { fromISO, periodBounds, addDays, monthLabel, longDateYear } from './format';
 import { money, num } from './format';
 
 // Builds a month report grouped by client. For a monthly biller, the month is
@@ -26,7 +26,8 @@ export type ClientReport = {
 export type MonthlyReport = {
   year: number;
   month: number;
-  billingDate: string;       // last day of the month
+  periodStart: string;       // first day of the billing period
+  billingDate: string;       // last day of the billing period
   expectedPayDate: string;   // billingDate + payment terms
   clients: ClientReport[];
   totals: {
@@ -40,10 +41,7 @@ export type MonthlyReport = {
   };
 };
 
-const inMonth = (iso: string, year: number, month: number) => {
-  const d = fromISO(iso);
-  return d.getFullYear() === year && d.getMonth() === month;
-};
+const inRange = (iso: string, start: string, end: string) => iso >= start && iso <= end;
 
 export function buildMonthlyReport(
   dayEntries: DayEntry[],
@@ -53,9 +51,10 @@ export function buildMonthlyReport(
   year: number,
   month: number
 ): MonthlyReport {
-  const days = dayEntries.filter((d) => inMonth(d.date, year, month));
-  const exps = expenses.filter((e) => inMonth(e.date, year, month));
-  const miles = mileage.filter((m) => inMonth(m.date, year, month));
+  const { start, end } = periodBounds(year, month, profile.billingCycle || 'calendar');
+  const days = dayEntries.filter((d) => inRange(d.date, start, end));
+  const exps = expenses.filter((e) => inRange(e.date, start, end));
+  const miles = mileage.filter((m) => inRange(m.date, start, end));
 
   const keys = new Set<string>();
   days.forEach((d) => keys.add(d.client ?? ''));
@@ -122,10 +121,10 @@ export function buildMonthlyReport(
     { income: 0, reimbursable: 0, deductible: 0, perDiem: 0, miles: 0, mileageDeduction: 0, invoiceTotal: 0 }
   );
 
-  const { end } = monthBounds(year, month);
   return {
     year,
     month,
+    periodStart: start,
     billingDate: end,
     expectedPayDate: addDays(end, profile.paymentTermsDays || 0),
     clients,

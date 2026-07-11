@@ -34,7 +34,7 @@ export default function ReportScreen() {
   const onExportPdf = async () => {
     try {
       // Read this month's receipt photos and embed them per client.
-      const receipts = await buildReceiptItems(expenses, ym.year, ym.month);
+      const receipts = await buildReceiptItems(expenses, report.periodStart, report.billingDate);
       const html = buildReportHtml(report, profile, receipts);
       const { uri } = await Print.printToFileAsync({ html });
 
@@ -80,7 +80,7 @@ export default function ReportScreen() {
         {hasData ? (
           <>
             <Text style={styles.dates}>
-              Bill {longDateYear(report.billingDate)} · Paid ~{longDateYear(report.expectedPayDate)}
+              {longDateYear(report.periodStart)} – {longDateYear(report.billingDate)} · Paid ~{longDateYear(report.expectedPayDate)}
             </Text>
 
             {report.clients.map((c) => (

@@ -95,6 +95,7 @@ export type Profile = {
   paymentTermsDays: number;  // days from billing to payment, e.g. net-30
   perDiemMie: number;        // default daily M&IE (GSA FY2026 standard = 68)
   employmentType: 'w2' | '1099';  // reframes deduction language app-wide
+  billingCycle: 'calendar' | 'last-sunday';  // invoice period boundary
   businessName: string;      // invoice From block; falls back to name
   businessAddress: string;   // multi-line
   businessPhone: string;
@@ -161,6 +162,7 @@ const defaultProfile: Profile = {
   paymentTermsDays: 30,
   perDiemMie: 68,
   employmentType: '1099',
+  billingCycle: 'calendar',
   businessName: '',
   businessAddress: '',
   businessPhone: '',
@@ -263,7 +265,7 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 13,
+      version: 14,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;

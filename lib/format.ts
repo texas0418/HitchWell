@@ -62,6 +62,27 @@ export function daysUntil(iso: string): number {
   return Math.round((target.getTime() - today.getTime()) / 86400000);
 }
 
+// Last occurrence of a weekday (0=Sun..6=Sat) in a month, as ISO.
+export function lastWeekdayOfMonth(year: number, month: number, weekday: number): string {
+  const last = new Date(year, month + 1, 0); // last calendar day
+  const back = (last.getDay() - weekday + 7) % 7;
+  return toISODate(new Date(year, month, last.getDate() - back));
+}
+
+// Billing-period bounds for a month. cycle 'calendar' = 1st..last day.
+// cycle 'last-sunday' = day after previous month's last Sunday .. this
+// month's last Sunday.
+export function periodBounds(
+  year: number,
+  month: number,
+  cycle: 'calendar' | 'last-sunday'
+): { start: string; end: string } {
+  if (cycle !== 'last-sunday') return monthBounds(year, month);
+  const prev = addMonths(year, month, -1);
+  const prevEnd = lastWeekdayOfMonth(prev.year, prev.month, 0);
+  return { start: addDays(prevEnd, 1), end: lastWeekdayOfMonth(year, month, 0) };
+}
+
 // Month helpers for period reports.
 export function monthBounds(year: number, month: number): { start: string; end: string } {
   const start = toISODate(new Date(year, month, 1));

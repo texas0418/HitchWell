@@ -8,10 +8,11 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { Chip } from '../components/Chip';
+import { DateField } from '../components/DateField';
 import { useStore, CATEGORY_LABEL, DayType } from '../lib/store';
 import { buildInvoiceHtml, InvoiceLine } from '../lib/invoiceHtml';
 import { buildReceiptItems } from '../lib/receiptEmbed';
-import { fromISO, money, monthBounds, monthLabel, addDays, longDate } from '../lib/format';
+import { money, periodBounds, addDays, longDate } from '../lib/format';
 
 const TYPE_LABEL: Record<DayType, string> = { worked: 'Worked', travel: 'Travel', standby: 'Standby', off: 'Off' };
 
@@ -32,10 +33,12 @@ export default function InvoiceScreen() {
   const [project, setProject] = useState<string>(''); // '' = all projects
   const [exported, setExported] = useState(false);
 
-  const inMonth = (iso: string) => {
-    const d = fromISO(iso);
-    return d.getFullYear() === year && d.getMonth() === month;
-  };
+  const bounds = periodBounds(year, month, profile.billingCycle || 'calendar');
+  // Editable per invoice; defaults follow the billing-cycle setting.
+  const [periodStart, setPeriodStart] = useState(bounds.start);
+  const [end, setEnd] = useState(bounds.end);
+  const datesValid = periodStart <= end;
+  const inMonth = (iso: string) => iso >= periodStart && iso <= end;
 
   const monthProjects = useMemo(() => {
     const set = new Set<string>();
@@ -75,16 +78,15 @@ export default function InvoiceScreen() {
       out.push({ desc: `${CATEGORY_LABEL[e.category]}${e.note ? ` — ${e.note}` : ''} (${longDate(e.date)})`, amount: e.amount || 0 });
     }
     return out;
-  }, [dayEntries, expenses, client, year, month, includePerDiem, project, profile.perDiemMie]);
+  }, [dayEntries, expenses, client, periodStart, end, includePerDiem, project, profile.perDiemMie]);
 
   const total = lines.reduce((sum, l) => sum + l.amount, 0);
-  const { end } = monthBounds(year, month);
   const dueDate = addDays(end, profile.paymentTermsDays || 0);
 
   const onExport = async () => {
     try {
       const receipts = (
-        await buildReceiptItems(expenses.filter((e) => matchesProject(e.project)), year, month)
+        await buildReceiptItems(expenses.filter((e) => matchesProject(e.project)), periodStart, end)
       ).filter((r) => r.client === client);
       const html = buildInvoiceHtml({
         invoiceNo: invoiceNo.trim() || 'INVOICE',
@@ -125,7 +127,7 @@ export default function InvoiceScreen() {
       <Stack.Screen options={{ headerShown: true, title: 'Invoice' }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <Text style={s.head}>{client || 'Unassigned'}</Text>
-        <Text style={s.sub}>{monthLabel(year, month)} · Due {longDate(dueDate)}</Text>
+        <Text style={s.sub}>{longDate(periodStart)} – {longDate(end)} · Due {longDate(dueDate)}</Text>
 
         {monthProjects.length > 0 && (
           <>
@@ -138,6 +140,12 @@ export default function InvoiceScreen() {
             </View>
           </>
         )}
+
+        <Text style={s.label}>Period Start</Text>
+        <DateField value={periodStart} onChange={setPeriodStart} />
+        <Text style={s.label}>Period End</Text>
+        <DateField value={end} onChange={setEnd} />
+        {!datesValid && <Text style={[s.note, { color: t.danger }]}>End date is before start date.</Text>}
 
         <Text style={s.label}>Invoice Number</Text>
         <TextInput style={s.input} value={invoiceNo} onChangeText={setInvoiceNo} autoCapitalize="characters" />
@@ -166,7 +174,7 @@ export default function InvoiceScreen() {
           )}
         </View>
 
-        {lines.length > 0 && (
+        {lines.length > 0 && datesValid && (
           <Pressable style={s.exportBtn} onPress={onExport}>
             <Text style={s.exportText}>Export Invoice PDF</Text>
           </Pressable>

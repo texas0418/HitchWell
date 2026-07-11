@@ -21,15 +21,10 @@ const mimeFor = (uri: string): string => {
 
 export async function buildReceiptItems(
   expenses: Expense[],
-  year: number,
-  month: number
+  start: string,
+  end: string
 ): Promise<ReceiptItem[]> {
-  const inMonth = (iso: string) => {
-    const d = fromISO(iso);
-    return d.getFullYear() === year && d.getMonth() === month;
-  };
-
-  const withReceipts = expenses.filter((e) => e.receiptUri && inMonth(e.date));
+  const withReceipts = expenses.filter((e) => e.receiptUri && e.date >= start && e.date <= end);
   const items: ReceiptItem[] = [];
 
   for (const e of withReceipts) {
