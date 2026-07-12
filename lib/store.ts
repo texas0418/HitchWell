@@ -112,6 +112,13 @@ export type Profile = {
 
 export type Appearance = 'system' | 'light' | 'dark';
 
+export type ClientInfo = {
+  contact: string;   // AP contact or supervisor name
+  address: string;   // multi-line
+  phone: string;
+  email: string;
+};
+
 type State = {
   profile: Profile;
   onboarded: boolean;
@@ -119,6 +126,7 @@ type State = {
   invoiceCounter: number;
   proUnlocked: boolean;
   clients: string[];
+  clientInfo: Record<string, ClientInfo>;
   projects: string[];
   dayEntries: DayEntry[];
   expenses: Expense[];
@@ -131,6 +139,7 @@ type State = {
   setProUnlocked: (v: boolean) => void;
   addClient: (name: string) => void;
   removeClient: (name: string) => void;
+  setClientInfo: (name: string, info: ClientInfo) => void;
   addProject: (name: string) => void;
   removeProject: (name: string) => void;
 
@@ -188,6 +197,7 @@ export const useStore = create<State>()(
       invoiceCounter: 1,
       proUnlocked: false,
       clients: [],
+      clientInfo: {},
       projects: [],
       dayEntries: [],
       expenses: [],
@@ -205,7 +215,15 @@ export const useStore = create<State>()(
           if (!n || s.clients.some((c) => c.toLowerCase() === n.toLowerCase())) return {};
           return { clients: [...s.clients, n].sort((a, b) => a.localeCompare(b)) };
         }),
-      removeClient: (name) => set((s) => ({ clients: s.clients.filter((c) => c !== name) })),
+      removeClient: (name) =>
+        set((s) => {
+          const info = { ...s.clientInfo };
+          delete info[name];
+          return { clients: s.clients.filter((c) => c !== name), clientInfo: info };
+        }),
+
+      setClientInfo: (name, info) =>
+        set((s) => ({ clientInfo: { ...s.clientInfo, [name]: info } })),
 
       addProject: (name) =>
         set((s) => {
@@ -266,7 +284,7 @@ export const useStore = create<State>()(
           };
         }),
 
-      clearAll: () => set(() => ({ clients: [], projects: [], dayEntries: [], expenses: [], mileage: [], certs: [] })),
+      clearAll: () => set(() => ({ clients: [], clientInfo: {}, projects: [], dayEntries: [], expenses: [], mileage: [], certs: [] })),
 
       // Replaces user data from a backup file. Unknown keys are ignored;
       // missing keys keep their current values. Receipt URIs from another
@@ -284,6 +302,7 @@ export const useStore = create<State>()(
             mileage: Array.isArray(d.mileage) ? d.mileage : s.mileage,
             certs: Array.isArray(d.certs) ? d.certs : s.certs,
             clients: Array.isArray(d.clients) ? d.clients : s.clients,
+            clientInfo: d.clientInfo && typeof d.clientInfo === 'object' ? d.clientInfo : s.clientInfo,
             projects: Array.isArray(d.projects) ? d.projects : s.projects,
             invoiceCounter: typeof d.invoiceCounter === 'number' ? d.invoiceCounter : s.invoiceCounter,
             onboarded: true,
@@ -293,13 +312,14 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 16,
+      version: 17,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;
         if (!persisted.appearance) persisted.appearance = 'system';
         if (!persisted.invoiceCounter) persisted.invoiceCounter = 1;
         if (!Array.isArray(persisted.projects)) persisted.projects = [];
+        if (!persisted.clientInfo || typeof persisted.clientInfo !== 'object') persisted.clientInfo = {};
         persisted.profile = { ...defaultProfile, ...(persisted.profile ?? {}) };
         // Older expenses had no reimbursable flag; default them to deductible.
         if (Array.isArray(persisted.expenses)) {

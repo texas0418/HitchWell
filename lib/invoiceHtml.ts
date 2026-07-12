@@ -1,4 +1,4 @@
-import { Profile } from './store';
+import { Profile, ClientInfo } from './store';
 import { ReceiptItem } from './receiptEmbed';
 import { money, longDateYear } from './format';
 
@@ -13,6 +13,7 @@ const esc = (s: string) =>
 export function buildInvoiceHtml(opts: {
   invoiceNo: string;
   client: string;
+  clientInfo?: ClientInfo;
   project?: string;
   profile: Profile;
   billDate: string;   // ISO
@@ -20,7 +21,12 @@ export function buildInvoiceHtml(opts: {
   lines: InvoiceLine[];
   receipts: ReceiptItem[];
 }): string {
-  const { invoiceNo, client, project, profile, billDate, dueDate, lines, receipts } = opts;
+  const { invoiceNo, client, clientInfo, project, profile, billDate, dueDate, lines, receipts } = opts;
+  const toDetails = [clientInfo?.contact, clientInfo?.address, clientInfo?.phone, clientInfo?.email]
+    .map((x) => (x || '').trim())
+    .filter(Boolean)
+    .map((x) => esc(x).replace(/\n/g, '<br/>'))
+    .join('<br/>');
   const total = lines.reduce((s, l) => s + l.amount, 0);
   const fromName = (profile.businessName || profile.name || 'Contractor').trim();
   const fromDetails = [profile.businessAddress, profile.businessPhone, profile.businessEmail]
@@ -78,7 +84,7 @@ export function buildInvoiceHtml(opts: {
 
   <div class="parties">
     <div class="party"><h3>From</h3><div>${esc(fromName)}</div>${fromDetails ? `<p class="det">${fromDetails}</p>` : ''}</div>
-    <div class="party"><h3>Bill to</h3><div>${esc(client || 'Unassigned')}</div>${project ? `<p class="det">Project: ${esc(project)}</p>` : ''}</div>
+    <div class="party"><h3>Bill to</h3><div>${esc(client || 'Unassigned')}</div>${toDetails ? `<p class="det">${toDetails}</p>` : ''}${project ? `<p class="det">Project: ${esc(project)}</p>` : ''}</div>
   </div>
 
   <table>

@@ -21,6 +21,7 @@ export default function SettingsData() {
       mileage: st.mileage,
       certs: st.certs,
       clients: st.clients,
+      clientInfo: st.clientInfo,
       projects: st.projects,
       invoiceCounter: st.invoiceCounter,
     });

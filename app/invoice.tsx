@@ -22,7 +22,7 @@ export default function InvoiceScreen() {
   const s = useMemo(() => makeStyles(t), [t]);
   const router = useRouter();
   const params = useLocalSearchParams<{ client?: string; year?: string; month?: string }>();
-  const { dayEntries, expenses, profile, invoiceCounter, bumpInvoiceCounter } = useStore();
+  const { dayEntries, expenses, profile, clientInfo, invoiceCounter, bumpInvoiceCounter } = useStore();
 
   const client = params.client ?? '';
   const year = Number(params.year) || new Date().getFullYear();
@@ -100,6 +100,7 @@ export default function InvoiceScreen() {
       const html = buildInvoiceHtml({
         invoiceNo: invoiceNo.trim() || 'INVOICE',
         client,
+        clientInfo: clientInfo[client],
         project: project || undefined,
         profile,
         billDate: end,

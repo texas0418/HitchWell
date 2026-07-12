@@ -9,26 +9,16 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.page4films.hitchwell",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.page4films.hitchwell"
     },
     "android": {
-      "package": "com.page4films.hitchwell",
-      "permissions": [
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "package": "com.page4films.hitchwell"
     },
     "plugins": [
       "expo-router",
       [
         "expo-local-authentication",
-        {
-          "faceIDPermission": "Reveal your income and expense amounts."
-        }
+        { "faceIDPermission": "Reveal your income and expense amounts." }
       ],
       [
         "expo-image-picker",
