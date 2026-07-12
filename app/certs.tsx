@@ -34,7 +34,7 @@ export default function CertsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={styles.lead}>A lapsed ticket means you get turned away at the gate. Track expiries here.</Text>
 
         {open ? (

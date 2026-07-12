@@ -99,7 +99,7 @@ export default function ReportScreen() {
                 <View style={styles.line}><Text style={styles.k}>Days worked</Text><Text style={styles.v}>{c.workedDays}{c.perDiemDays ? ` · ${c.perDiemDays} per diem` : ''}</Text></View>
                 <View style={styles.line}><Text style={styles.k}>Day-rate income</Text><AmountText style={styles.v}>{money(c.income)}</AmountText></View>
                 {c.perDiem > 0 && (
-                  <View style={styles.line}><Text style={styles.k}>Per diem ({c.perDiemDays}d)</Text><AmountText style={styles.v}>{money(c.perDiem)}</AmountText></View>
+                  <View style={styles.line}><Text style={styles.k}>Per diem + lodging ({c.perDiemDays}d)</Text><AmountText style={styles.v}>{money(c.perDiem)}</AmountText></View>
                 )}
 
                 {c.reimbursable > 0 && (
@@ -138,7 +138,7 @@ export default function ReportScreen() {
               <Text style={styles.totalTitle}>Totals</Text>
               <View style={styles.line}><Text style={styles.k}>Day-rate income</Text><AmountText style={styles.v}>{money(report.totals.income)}</AmountText></View>
               {report.totals.perDiem > 0 && (
-                <View style={styles.line}><Text style={styles.k}>Per diem (M&IE)</Text><AmountText style={styles.v}>{money(report.totals.perDiem)}</AmountText></View>
+                <View style={styles.line}><Text style={styles.k}>Per diem + lodging</Text><AmountText style={styles.v}>{money(report.totals.perDiem)}</AmountText></View>
               )}
               <View style={styles.line}><Text style={styles.k}>Reimbursable</Text><AmountText style={styles.v}>{money(report.totals.reimbursable)}</AmountText></View>
               <View style={styles.line}><Text style={styles.kStrong}>Invoice total</Text><AmountText style={styles.vStrong}>{money(report.totals.invoiceTotal)}</AmountText></View>

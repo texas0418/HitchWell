@@ -55,7 +55,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: Re
             <tbody>
               <tr><td>Days worked</td><td class="amt">${c.workedDays}${c.perDiemDays ? ` (${c.perDiemDays} per diem)` : ''}</td></tr>
               <tr><td>Day-rate income</td><td class="amt">${money(c.income)}</td></tr>
-              ${c.perDiem > 0 ? `<tr><td>Per diem M&amp;IE (${c.perDiemDays} days)</td><td class="amt">${money(c.perDiem)}</td></tr>` : ''}
+              ${c.perDiem > 0 ? `<tr><td>Per diem &amp; lodging (${c.perDiemDays} days)</td><td class="amt">${money(c.perDiem)}</td></tr>` : ''}
               ${c.reimbursable > 0 ? `<tr class="head"><td>Reimbursable</td><td class="amt">${money(c.reimbursable)}</td></tr>${catRows}` : ''}
               ${c.miles > 0 ? `<tr><td>Mileage</td><td class="amt">${num(c.miles)} mi (${money(c.mileageDeduction)} est.)</td></tr>` : ''}
               ${c.deductible > 0 ? `<tr class="muted"><td>${deductWord} (not billed)</td><td class="amt">${money(c.deductible)}</td></tr>` : ''}
@@ -113,7 +113,7 @@ export function buildReportHtml(r: MonthlyReport, profile: Profile, receipts: Re
     <table>
       <tbody>
         <tr><td>Day-rate income</td><td class="amt">${money(r.totals.income)}</td></tr>
-        ${r.totals.perDiem > 0 ? `<tr><td>Per diem M&amp;IE</td><td class="amt">${money(r.totals.perDiem)}</td></tr>` : ''}
+        ${r.totals.perDiem > 0 ? `<tr><td>Per diem &amp; lodging</td><td class="amt">${money(r.totals.perDiem)}</td></tr>` : ''}
         <tr><td>Reimbursable</td><td class="amt">${money(r.totals.reimbursable)}</td></tr>
         <tr class="strong"><td>Invoice total</td><td class="amt">${money(r.totals.invoiceTotal)}</td></tr>
         <tr class="muted"><td>${deductWord}</td><td class="amt">${money(r.totals.deductible)}</td></tr>

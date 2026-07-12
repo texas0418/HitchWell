@@ -192,7 +192,7 @@ const makeStyles = (t: AppColors) =>
     empty: { fontSize: 13, color: t.muted, paddingTop: 18, textAlign: 'center' },
 
     row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.hairline2 },
-    rowDate: { fontSize: 12, color: t.faint, width: 42 },
+    rowDate: { fontSize: 11, color: t.faint, width: 50 },
     rowMain: { flex: 1, fontSize: 13, color: t.ink },
     rowAmt: { fontSize: 13, color: t.ink },
   });

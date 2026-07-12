@@ -30,7 +30,7 @@ export default function SettingsLists() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.sectionTitle}>Clients</Text>
         <Text style={s.note}>The list you pick from when logging days, expenses, and mileage. Reports group on these.</Text>
         {clients.length === 0 && <Text style={s.emptyList}>No clients yet. Add one below or from any log screen.</Text>}

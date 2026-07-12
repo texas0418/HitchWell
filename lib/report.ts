@@ -73,7 +73,7 @@ export function buildMonthlyReport(
     const perDiemDays = cd.filter((d) => d.perDiem).length;
     const perDiem = cd
       .filter((d) => d.perDiem)
-      .reduce((s, d) => s + (d.perDiemAmount ?? profile.perDiemMie ?? 0), 0);
+      .reduce((s, d) => s + (d.perDiemAmount ?? profile.perDiemMie ?? 0) + (d.lodgingAmount ?? 0), 0);
     const milesTotal = cm.reduce((s, m) => s + (m.miles || 0), 0);
 
     const reimb = ce.filter((e) => e.reimbursable);
@@ -147,7 +147,7 @@ export function buildReportText(r: MonthlyReport, deductWord = 'Your deductions'
     L.push(clientLabel(c.client));
     L.push(`  Days worked: ${c.workedDays}  (per diem: ${c.perDiemDays})`);
     L.push(`  Day-rate income: ${money(c.income)}`);
-    if (c.perDiem > 0) L.push(`  Per diem (M&IE): ${money(c.perDiem)} over ${c.perDiemDays} days`);
+    if (c.perDiem > 0) L.push(`  Per diem & lodging: ${money(c.perDiem)} over ${c.perDiemDays} days`);
     if (c.reimbursable > 0) {
       L.push(`  Reimbursable: ${money(c.reimbursable)}`);
       for (const cat of c.reimbursableByCategory) {
@@ -162,7 +162,7 @@ export function buildReportText(r: MonthlyReport, deductWord = 'Your deductions'
 
   L.push('TOTALS');
   L.push(`  Day-rate income: ${money(r.totals.income)}`);
-  if (r.totals.perDiem > 0) L.push(`  Per diem (M&IE): ${money(r.totals.perDiem)}`);
+  if (r.totals.perDiem > 0) L.push(`  Per diem & lodging: ${money(r.totals.perDiem)}`);
   L.push(`  Reimbursable: ${money(r.totals.reimbursable)}`);
   L.push(`  Invoice total: ${money(r.totals.invoiceTotal)}`);
   L.push(`  ${deductWord}: ${money(r.totals.deductible)}`);

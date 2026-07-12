@@ -16,6 +16,7 @@ export type DayEntry = {
   location: string;
   perDiem: boolean;
   perDiemAmount?: number;  // M&IE dollars applied that day (75% on travel days)
+  lodgingAmount?: number;  // per-night lodging when the hand books their own room
   client?: string;
   project?: string;        // e.g. Manatee, Powernap — canonical pick-list
 };
@@ -292,7 +293,7 @@ export const useStore = create<State>()(
     {
       name: 'hitchwell-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 15,
+      version: 16,
       migrate: (persisted: any, fromVersion: number) => {
         if (!persisted) return persisted;
         if (fromVersion < 2) persisted.onboarded = true;

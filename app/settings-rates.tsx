@@ -30,7 +30,7 @@ export default function SettingsRates() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.label}>Default Day Rate ($)</Text>
         <NumField value={rate} onChangeText={setRate} keyboardType="number-pad" />
 

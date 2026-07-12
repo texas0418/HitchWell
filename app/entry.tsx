@@ -9,7 +9,7 @@ import { DateField } from '../components/DateField';
 import { NumField } from '../components/NumField';
 import { StatePicker } from '../components/StatePicker';
 import { useStore, DayType } from '../lib/store';
-import { firstLastMie, mieForLocation, findArea } from '../lib/perdiem';
+import { firstLastMie, mieForLocation, findArea, STANDARD_CONUS } from '../lib/perdiem';
 import { hitchStatus } from '../lib/hitch';
 import { todayISO, addDays, longDate } from '../lib/format';
 
@@ -43,6 +43,8 @@ export default function EntryScreen() {
   const [project, setProject] = useState(existing?.project ?? '');
   const [perDiem, setPerDiem] = useState(existing?.perDiem ?? true);
   const [perDiemAmt, setPerDiemAmt] = useState(String(existing?.perDiemAmount ?? profile.perDiemMie));
+  const [lodging, setLodging] = useState(!!existing?.lodgingAmount);
+  const [lodgingAmt, setLodgingAmt] = useState(String(existing?.lodgingAmount ?? STANDARD_CONUS.lodging));
 
   const isOff = type === 'off';
 
@@ -56,6 +58,7 @@ export default function EntryScreen() {
     project: project.trim() || undefined,
     perDiem: isOff ? false : perDiem,
     perDiemAmount: !isOff && perDiem ? Number(perDiemAmt) || 0 : undefined,
+    lodgingAmount: !isOff && perDiem && lodging ? Number(lodgingAmt) || 0 : undefined,
   });
 
   const save = () => {
@@ -124,7 +127,7 @@ export default function EntryScreen() {
   }, [profile]);
 
   return (
-    <ScrollView style={s.safe} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+    <ScrollView style={s.safe} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
       {!existing && (
         <View style={s.modeRow}>
           <Pressable style={[s.modeBtn, !range && s.modeOn]} onPress={() => setRange(false)}>
@@ -203,7 +206,7 @@ export default function EntryScreen() {
 
           <View style={s.switchRow}>
             <Text style={s.switchLabel}>Per Diem {range && rangeDays > 1 ? 'Days' : 'Day'}</Text>
-            <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ true: t.accent }} />
+            <Switch value={perDiem} onValueChange={setPerDiem} trackColor={{ false: t.border, true: t.accent }} ios_backgroundColor={t.border} />
           </View>
 
           {perDiem && (
@@ -238,6 +241,20 @@ export default function EntryScreen() {
                   </>
                 );
               })()}
+
+              <View style={s.switchRow}>
+                <Text style={s.switchLabel}>Include Lodging</Text>
+                <Switch value={lodging} onValueChange={setLodging} trackColor={{ false: t.border, true: t.accent }} ios_backgroundColor={t.border} />
+              </View>
+              {lodging && (
+                <>
+                  <Text style={s.label}>Lodging ($/night)</Text>
+                  <NumField value={lodgingAmt} onChangeText={setLodgingAmt} placeholder="110" />
+                  <Text style={s.perDiemNote}>
+                    Standard CONUS lodging is ${STANDARD_CONUS.lodging}/night. Area and seasonal rates vary; check gsa.gov/perdiem.
+                  </Text>
+                </>
+              )}
             </View>
           )}
         </>

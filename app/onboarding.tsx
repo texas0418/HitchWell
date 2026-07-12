@@ -27,7 +27,7 @@ export default function Onboarding() {
 
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.brand}>HitchWell</Text>
         <Text style={s.lead}>A few defaults so logging a day takes one tap. All of it can change later in settings.</Text>
 

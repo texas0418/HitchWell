@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
 import { ClientField } from '../components/ClientField';
+import { NumField } from '../components/NumField';
 import { ProjectField } from '../components/ProjectField';
 import { AmountText } from '../components/AmountText';
 import { useStore, ExpenseCategory, EXPENSE_CATEGORIES, CATEGORY_LABEL } from '../lib/store';
@@ -90,7 +91,7 @@ export default function ExpensesScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View style={styles.totalRow}>
           <View style={styles.totalCard}>
             <Text style={styles.totalLabel}>To be reimbursed</Text>
@@ -111,7 +112,7 @@ export default function ExpensesScreen() {
               ))}
             </View>
             <Text style={styles.label}>Amount ($)</Text>
-            <TextInput style={styles.input} value={amount} onChangeText={setAmount} keyboardType="number-pad" placeholder="0" placeholderTextColor={t.faint} />
+            <NumField value={amount} onChangeText={setAmount} keyboardType="number-pad" placeholder="0" />
             <Text style={styles.label}>Note</Text>
             <TextInput style={styles.input} value={note} onChangeText={setNote} placeholder="optional" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Client / job</Text>
@@ -146,7 +147,7 @@ export default function ExpensesScreen() {
                 <Text style={styles.switchLabel}>Reimbursable</Text>
                 <Text style={styles.switchHint}>{reimbursable ? 'Goes on your expense report' : isW2 ? 'Your own cost (not deductible as W-2)' : 'Your own deduction'}</Text>
               </View>
-              <Switch value={reimbursable} onValueChange={setReimbursable} trackColor={{ true: t.accent }} />
+              <Switch value={reimbursable} onValueChange={setReimbursable} trackColor={{ false: t.border, true: t.accent }} ios_backgroundColor={t.border} />
             </View>
             <Pressable style={styles.addBtn} onPress={add}><Text style={styles.addText}>Add expense</Text></Pressable>
           </View>
@@ -163,14 +164,14 @@ export default function ExpensesScreen() {
               <Image source={{ uri: e.receiptUri }} style={styles.rowThumb} />
             ) : null}
             <View style={styles.rowBody}>
-              <Text style={styles.rowTitle}>{CATEGORY_LABEL[e.category]}{e.note ? ` · ${e.note}` : ''}</Text>
+              <Text style={styles.rowTitle} numberOfLines={1}>{CATEGORY_LABEL[e.category]}{e.note ? ` · ${e.note}` : ''}</Text>
               <View style={styles.rowMeta}>
                 <View style={[styles.tag, e.reimbursable ? styles.tagReimb : styles.tagDeduct]}>
                   <Text style={[styles.tagText, e.reimbursable ? styles.tagTextReimb : styles.tagTextDeduct]}>
                     {e.reimbursable ? 'Reimbursable' : isW2 ? 'Out of pocket' : 'Deduction'}
                   </Text>
                 </View>
-                <Text style={styles.rowSub}>{[longDate(e.date), e.client, e.project].filter(Boolean).join(' · ')}</Text>
+                <Text style={styles.rowSub} numberOfLines={1}>{[longDate(e.date), e.client, e.project].filter(Boolean).join(' · ')}</Text>
               </View>
             </View>
             <AmountText style={styles.amount}>{money(e.amount)}</AmountText>
@@ -225,6 +226,6 @@ const makeStyles = (t: AppColors) => StyleSheet.create({
   tagText: { fontSize: 10, fontWeight: '500' },
   tagTextReimb: { color: '#0C447C' },
   tagTextDeduct: { color: t.muted },
-  rowSub: { fontSize: 11, color: t.muted },
+  rowSub: { fontSize: 11, color: t.muted, flex: 1 },
   amount: { fontSize: 14, fontWeight: '500', color: t.ink },
 });

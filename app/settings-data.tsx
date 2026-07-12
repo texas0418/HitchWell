@@ -38,7 +38,7 @@ export default function SettingsData() {
       `This replaces everything on this device with the backup from ${picked.exportedAt.slice(0, 10)}. Receipt photos are not part of backups.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Replace', style: 'destructive', onPress: () => importAll(picked.data) },
+        { text: 'Replace', style: 'destructive', onPress: () => { importAll(picked.data); Alert.alert('Backup restored', 'Your data was replaced with the backup.'); } },
       ]
     );
   };
@@ -46,7 +46,7 @@ export default function SettingsData() {
   const confirmClear = () => {
     Alert.alert('Clear all data?', 'This removes every day, expense, mileage trip, and cert on this device.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear', style: 'destructive', onPress: () => { clearAll(); clearAllReceipts(); } },
+      { text: 'Clear', style: 'destructive', onPress: () => { clearAll(); clearAllReceipts(); Alert.alert('Data cleared', 'Everything on this device was removed.'); } },
     ]);
   };
 

@@ -72,6 +72,9 @@ export default function InvoiceScreen() {
       const pdDays = days.filter((d) => d.perDiem);
       const pdTotal = pdDays.reduce((sum, d) => sum + (d.perDiemAmount ?? profile.perDiemMie ?? 0), 0);
       if (pdTotal > 0) out.push({ desc: `Per diem (M&IE) — ${pdDays.length} day${pdDays.length === 1 ? '' : 's'}`, amount: pdTotal });
+      const lodgingDays = days.filter((d) => d.lodgingAmount);
+      const lodgingTotal = lodgingDays.reduce((sum, d) => sum + (d.lodgingAmount ?? 0), 0);
+      if (lodgingTotal > 0) out.push({ desc: `Lodging — ${lodgingDays.length} night${lodgingDays.length === 1 ? '' : 's'}`, amount: lodgingTotal });
     }
 
     // Reimbursable expenses, itemized.
@@ -131,7 +134,7 @@ export default function InvoiceScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
       <Stack.Screen options={{ headerShown: true, title: 'Invoice' }} />
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.head}>{client || 'Unassigned'}</Text>
         <Text style={s.sub}>{longDate(periodStart)} – {longDate(end)} · Due {longDate(dueDate)}</Text>
 
@@ -158,7 +161,7 @@ export default function InvoiceScreen() {
 
         <View style={s.switchRow}>
           <Text style={s.switchLabel}>Include Per Diem</Text>
-          <Switch value={includePerDiem} onValueChange={setIncludePerDiem} trackColor={{ true: t.accent }} />
+          <Switch value={includePerDiem} onValueChange={setIncludePerDiem} trackColor={{ false: t.border, true: t.accent }} ios_backgroundColor={t.border} />
         </View>
 
         <View style={s.lineBox}>

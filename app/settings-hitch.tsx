@@ -29,7 +29,7 @@ export default function SettingsHitch() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.lead}>Days on / days off, and the first day of any hitch you know. Powers the calendar, days-home countdown, and year projection.</Text>
 
         <Text style={s.label}>Days On</Text>

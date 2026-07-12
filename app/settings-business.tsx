@@ -6,6 +6,13 @@ import { useTheme } from '../theme/colors';
 import { useStore } from '../lib/store';
 import { makeSettingsStyles } from '../lib/settingsStyles';
 
+const fmtPhone = (v: string) => {
+  const d = v.replace(/\D/g, '').slice(0, 10);
+  if (d.length < 4) return d;
+  if (d.length < 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+};
+
 export default function SettingsBusiness() {
   const t = useTheme();
   const s = useMemo(() => makeSettingsStyles(t), [t]);
@@ -31,7 +38,7 @@ export default function SettingsBusiness() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.lead}>Appears on the From block of your invoices. All optional.</Text>
 
         <Text style={s.label}>Business Name</Text>
@@ -41,7 +48,7 @@ export default function SettingsBusiness() {
         <TextInput style={[s.input, s.multiline]} value={bizAddress} onChangeText={setBizAddress} placeholder="street, city, state, zip" placeholderTextColor={t.faint} multiline />
 
         <Text style={s.label}>Phone</Text>
-        <TextInput style={s.input} value={bizPhone} onChangeText={setBizPhone} keyboardType="phone-pad" placeholder="optional" placeholderTextColor={t.faint} />
+        <TextInput style={s.input} value={bizPhone} onChangeText={(v) => setBizPhone(fmtPhone(v))} keyboardType="phone-pad" placeholder="optional" placeholderTextColor={t.faint} />
 
         <Text style={s.label}>Email</Text>
         <TextInput style={s.input} value={bizEmail} onChangeText={setBizEmail} keyboardType="email-address" autoCapitalize="none" placeholder="optional" placeholderTextColor={t.faint} />

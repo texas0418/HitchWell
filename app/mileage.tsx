@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, AppColors } from '../theme/colors';
 import { AmountText } from '../components/AmountText';
 import { ClientField } from '../components/ClientField';
+import { NumField } from '../components/NumField';
 import { ProjectField } from '../components/ProjectField';
 import { useStore } from '../lib/store';
 import * as calc from '../lib/calc';
@@ -35,7 +36,7 @@ export default function MileageScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View style={styles.summary}>
           <View>
             <Text style={styles.sumLabel}>{year} miles</Text>
@@ -51,7 +52,7 @@ export default function MileageScreen() {
         {open ? (
           <View style={styles.form}>
             <Text style={styles.label}>Miles</Text>
-            <TextInput style={styles.input} value={miles} onChangeText={setMiles} keyboardType="number-pad" placeholder="0" placeholderTextColor={t.faint} />
+            <NumField value={miles} onChangeText={setMiles} keyboardType="number-pad" placeholder="0" />
             <Text style={styles.label}>Purpose</Text>
             <TextInput style={styles.input} value={purpose} onChangeText={setPurpose} placeholder="e.g. home to location" placeholderTextColor={t.faint} />
             <Text style={styles.label}>Client / job</Text>
@@ -71,7 +72,7 @@ export default function MileageScreen() {
           <View key={m.id} style={styles.row}>
             <View style={styles.rowBody}>
               <Text style={styles.rowTitle}>{num(m.miles)} mi{m.purpose ? ` · ${m.purpose}` : ''}</Text>
-              <Text style={styles.rowSub}>{[longDate(m.date), m.client, m.project].filter(Boolean).join(' · ')}</Text>
+              <Text style={styles.rowSub} numberOfLines={1}>{[longDate(m.date), m.client, m.project].filter(Boolean).join(' · ')}</Text>
             </View>
             <Pressable hitSlop={8} onPress={() => removeMileage(m.id)}><Ionicons name="trash-outline" size={18} color={t.faint} /></Pressable>
           </View>

@@ -24,7 +24,7 @@ export default function SettingsProfile() {
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={s.label}>Name</Text>
         <TextInput style={s.input} value={name} onChangeText={setName} placeholder="optional" placeholderTextColor={t.faint} />
 
@@ -37,6 +37,8 @@ export default function SettingsProfile() {
 
         <Text style={s.label}>Home State</Text>
         <StatePicker value={homeState} onChange={setHomeState} />
+
+        <Text style={s.note}>Address, phone, and email for invoices live under Business Details.</Text>
 
         <Pressable style={s.saveBtn} onPress={save}><Text style={s.saveText}>Save</Text></Pressable>
       </ScrollView>

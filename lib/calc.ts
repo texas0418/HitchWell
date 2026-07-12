@@ -31,7 +31,7 @@ export function perDiemDays(dayEntries: DayEntry[], year: number): number {
 export function perDiemTotal(dayEntries: DayEntry[], year: number, profile: Profile): number {
   return dayEntries
     .filter((d) => yearOf(d.date) === year && d.perDiem)
-    .reduce((s, d) => s + (d.perDiemAmount ?? profile.perDiemMie ?? 0), 0);
+    .reduce((s, d) => s + (d.perDiemAmount ?? profile.perDiemMie ?? 0) + (d.lodgingAmount ?? 0), 0);
 }
 
 export function totalMileage(mileage: Mileage[], year: number): number {
