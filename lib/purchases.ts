@@ -11,8 +11,8 @@ import { useStore } from './store';
 //
 // SETUP (one time): create the app + product in RevenueCat, then paste the
 // public iOS SDK key below.
-const REVENUECAT_IOS_KEY = 'REPLACE_WITH_REVENUECAT_PUBLIC_IOS_KEY';
-const ENTITLEMENT = 'pro';
+const REVENUECAT_IOS_KEY = 'appl_oVUOzpUKfFqTUTUXPqNJEkujeaK';
+const ENTITLEMENT = 'HitchWell Pro'; // must match the RevenueCat entitlement Identifier exactly
 
 let Purchases: typeof import('react-native-purchases').default | null = null;
 let configured = false;
