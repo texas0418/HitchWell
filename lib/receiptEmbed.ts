@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { Expense, CATEGORY_LABEL } from './store';
-import { fromISO, longDate, money } from './format';
+import { longDate, money } from './format';
 
 // Reads receipt photos for a month's reimbursable expenses and returns them as
 // base64 data URIs, grouped for the PDF appendix. Files that fail to read are

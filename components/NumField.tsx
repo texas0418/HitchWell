@@ -26,9 +26,11 @@ export function NumField(props: TextInputProps) {
         keyboardType="decimal-pad"
         {...props}
         style={[base, props.style]}
+        // eslint-disable-next-line react-hooks/refs -- tracked in #6
         inputAccessoryViewID={Platform.OS === 'ios' ? idRef.current : undefined}
       />
       {Platform.OS === 'ios' && (
+        // eslint-disable-next-line react-hooks/refs -- tracked in #6
         <InputAccessoryView nativeID={idRef.current}>
           <View style={{ backgroundColor: t.surface, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.hairline, alignItems: 'flex-end' }}>
             <Pressable onPress={Keyboard.dismiss} hitSlop={8} style={{ paddingVertical: 10, paddingHorizontal: 18 }}>

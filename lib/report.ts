@@ -1,6 +1,5 @@
 import { DayEntry, Expense, Mileage, Profile, ExpenseCategory, CATEGORY_LABEL } from './store';
-import { fromISO, periodBounds, addDays, monthLabel, longDateYear } from './format';
-import { money, num } from './format';
+import { periodBounds, addDays, monthLabel, longDateYear, money, num } from './format';
 
 // Builds a month report grouped by client. For a monthly biller, the month is
 // the pay period. Income is day-rate only. Invoice total is what the staffing
