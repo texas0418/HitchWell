@@ -348,6 +348,7 @@ export function useHydrated(): boolean {
   const [hydrated, setHydrated] = useState(useStore.persist.hasHydrated());
   useEffect(() => {
     const unsub = useStore.persist.onFinishHydration(() => setHydrated(true));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- tracked in #7
     setHydrated(useStore.persist.hasHydrated());
     return () => unsub?.();
   }, []);

@@ -83,22 +83,15 @@ across days/expenses/mileage/certs, all rollups (income, by-state, per-diem days
 mileage, cert status), the privacy blur + Face ID flow, and a CSV export shared
 as text.
 
-Placeholder / next layer:
+Not yet real: tax math is a flat set-aside percentage (Settings), NOT a tax
+calculation — see the "v2 ideas" issue (#4) for the full next-layer list.
 
-- Tax math is a flat set-aside percentage (Settings), NOT a tax calculation. Per
-  diem is a day count, not GSA rates. Multi-state is an income split, not a
-  nonresident-return computation. This engine needs CPA-validated rules before it
-  informs anyone's filing.
-- No cloud: data lives only on the device. Supabase sync / multi-device is next.
-- Receipt photos, cert push-notifications, a native date picker, and a true
-  .csv file export (vs shared text) are not built yet.
-- IRS mileage rate and the set-aside % are user-entered in Settings — verify the
-  mileage rate with the IRS each tax year.
+## To-dos and bugs
 
-## Before launch
-
-Confirm the name in App Store Connect (create the app record to reserve it),
-run "HitchWell" through USPTO TESS, and grab hitchwell.com and the social handle.
+Tracked in [GitHub Issues](https://github.com/texas0418/HitchWell/issues) — the
+`pre-ship` label is the App Store submission checklist, `tech-debt` items have
+inline eslint-disables pointing at them, and `handoff` issues carry
+session-to-session notes. See AGENTS.md for the PR/CI workflow.
 
 ## Refreshing GSA per diem data
 
