@@ -59,7 +59,7 @@ export default function PaywallScreen() {
               </>
             ) : (
               <View style={s.disarmedBox}>
-                <Text style={s.disarmedTitle}>Purchases aren't live in this build</Text>
+                <Text style={s.disarmedTitle}>Purchases aren&apos;t live in this build</Text>
                 <Text style={s.note}>PDF exports are free until the store goes live. The unlock will appear here once it does.</Text>
               </View>
             )}

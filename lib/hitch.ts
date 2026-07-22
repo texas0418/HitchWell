@@ -1,5 +1,5 @@
 import { Profile } from './store';
-import { fromISO, toISODate, addDays, todayISO } from './format';
+import { fromISO, addDays, todayISO } from './format';
 
 // Rotation engine. The schedule is defined by three profile fields: days on,
 // days off, and an anchor date (the first day of any known hitch). Everything

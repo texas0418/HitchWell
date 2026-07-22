@@ -20,6 +20,7 @@ const TYPES: { key: DayType; label: string }[] = [
   { key: 'off', label: 'Off' },
 ];
 
+// eslint-disable-next-line complexity -- tracked in #5
 export default function EntryScreen() {
   const t = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);

@@ -42,7 +42,7 @@ export default function Onboarding() {
           <Chip label="1099 / Contractor" selected={employmentType === '1099'} onPress={() => setEmploymentType('1099')} />
           <Chip label="W-2 Employee" selected={employmentType === 'w2'} onPress={() => setEmploymentType('w2')} />
         </View>
-        <Text style={s.note}>Sets how the app talks about unreimbursed expenses. W-2 employees can't deduct them federally.</Text>
+        <Text style={s.note}>Sets how the app talks about unreimbursed expenses. W-2 employees can&apos;t deduct them federally.</Text>
 
         <Text style={s.label}>Pay Period</Text>
         <View style={s.chipRow}>

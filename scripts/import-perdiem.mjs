@@ -12,6 +12,7 @@
 // not), so we keep one M&IE record per area. Lodging is tracked as an actual
 // expense in the app and is not imported.
 
+// eslint-disable-next-line import/no-unresolved -- xlsx is installed ad-hoc when refreshing per-diem data (README); tracked in #8
 import * as XLSX from 'xlsx';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
