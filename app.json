@@ -39,7 +39,8 @@
       ],
       "expo-sharing",
       "expo-splash-screen",
-      "expo-status-bar"
+      "expo-status-bar",
+      "./plugins/withReleaseSigning.js"
     ],
     "experiments": {
       "typedRoutes": false

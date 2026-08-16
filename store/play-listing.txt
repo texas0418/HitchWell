@@ -1,0 +1,43 @@
+HITCHWELL — GOOGLE PLAY STORE LISTING (draft 2026-08-16)
+==========================================================
+
+APP NAME (30 chars max)
+HitchWell: Contractor Log
+
+SHORT DESCRIPTION (80 chars max)
+Days, pay, per-diem, mileage, multi-state and certs — for oil & gas hands.
+
+FULL DESCRIPTION (4000 chars max)
+-----------------------------------------------------
+Built for oil and gas contractors who live hitch to hitch: log the day in seconds, and know exactly what you're owed, where you worked, and when your certs expire.
+
+THE DAY, LOGGED IN SECONDS
+Day rate, per-diem, mileage — tap, done, back to work. HitchWell keeps the running totals for the hitch, the month, and the year.
+
+MULTI-STATE, HANDLED
+Working three states in one rotation? HitchWell tracks where every day happened, so tax season doesn't start with an archaeology project of old texts and crew-change memories.
+
+CERTS THAT NEVER AMBUSH YOU
+Safety cards, medicals, endorsements — with expiration dates that warn you before the gate does.
+
+YOUR NUMBERS, YOURS
+Everything stays on your phone, lockable behind your fingerprint. No account, no cloud, nobody's dashboard.
+
+You do the hitch. HitchWell does the arithmetic.
+-----------------------------------------------------
+
+CATEGORY: Business
+PRIVACY POLICY URL: https://texas0418.github.io/HitchWell/privacy.html
+  *** ACTION NEEDED (Simon): enable GitHub Pages (main /docs) after promotion — docs/privacy.html is in this PR.
+
+GRAPHIC ASSETS (store/): icon + feature graphic DONE; screenshots-android/ from release APK this run
+
+DATA SAFETY
+- Local-first, nothing collected; biometric handled by OS (no biometric data accessible)
+- RECORD_AUDIO permission in manifest — verify what uses it (voice notes?) and prepare the Play permissions justification, or strip the permission if unused
+- Purchases via RevenueCat (react-native-purchases in deps) — verify product at submission
+
+CONTENT RATING: Everyone
+
+RELEASE NOTES (first release)
+HitchWell arrives on Android: log days, pay, per-diem, mileage, and multi-state work in seconds — and never let a cert expire at the gate.
