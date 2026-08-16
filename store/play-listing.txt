@@ -27,8 +27,8 @@ You do the hitch. HitchWell does the arithmetic.
 -----------------------------------------------------
 
 CATEGORY: Business
-PRIVACY POLICY URL: https://texas0418.github.io/HitchWell/privacy.html
-  *** ACTION NEEDED (Simon): enable GitHub Pages (main /docs) after promotion — docs/privacy.html is in this PR.
+PRIVACY POLICY URL (real, verified live 2026-08-16): https://simonbuilds.app/privacy-hitchwell
+
 
 GRAPHIC ASSETS (store/): icon + feature graphic DONE; screenshots-android/ from release APK this run
 
