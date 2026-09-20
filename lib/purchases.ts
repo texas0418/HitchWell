@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useStore } from './store';
 
 // RevenueCat wrapper for the one-time Pro unlock ($19.99 non-consumable).
@@ -12,6 +12,9 @@ import { useStore } from './store';
 // SETUP (one time): create the app + product in RevenueCat, then paste the
 // public iOS SDK key below.
 const REVENUECAT_IOS_KEY = 'appl_oVUOzpUKfFqTUTUXPqNJEkujeaK';
+const REVENUECAT_ANDROID_KEY = 'goog_QbvjdjBGwAsjVNEoeicClrgaxTf'; // RC project 118c1954
+const REVENUECAT_KEY =
+  Platform.OS === 'android' ? REVENUECAT_ANDROID_KEY : REVENUECAT_IOS_KEY;
 const ENTITLEMENT = 'HitchWell Pro'; // must match the RevenueCat entitlement Identifier exactly
 
 let Purchases: typeof import('react-native-purchases').default | null = null;
@@ -21,7 +24,7 @@ let checked = false;
 function getPurchases() {
   if (checked) return Purchases;
   checked = true;
-  if (REVENUECAT_IOS_KEY.startsWith('REPLACE')) return null; // not set up yet
+  if (REVENUECAT_KEY.startsWith('REPLACE')) return null; // not set up yet
   try {
     Purchases = require('react-native-purchases').default;
     return Purchases;
@@ -34,7 +37,7 @@ async function ensureConfigured() {
   const P = getPurchases();
   if (!P) return null;
   if (!configured) {
-    P.configure({ apiKey: REVENUECAT_IOS_KEY });
+    P.configure({ apiKey: REVENUECAT_KEY });
     configured = true;
   }
   return P;
