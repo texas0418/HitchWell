@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme, AppColors } from '../theme/colors';
 import { Chip } from '../components/Chip';
+import MoreApps from '../components/MoreApps';
 import { useStore, Appearance } from '../lib/store';
 
 type S = ReturnType<typeof makeStyles>;
@@ -50,6 +51,8 @@ export default function SettingsMenu() {
         <View style={s.group}>
           <Row s={s} t={t} icon="ribbon-outline" label="HitchWell Pro" hint="Unlock PDF reports and invoices" onPress={() => router.push('/paywall')} />
         </View>
+
+        <MoreApps />
 
         <Text style={s.appLabel}>Appearance</Text>
         <View style={s.chipRow}>
