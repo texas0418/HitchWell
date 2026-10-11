@@ -2,7 +2,7 @@
   "expo": {
     "name": "HitchWell",
     "slug": "hitchwell",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "scheme": "hitchwell",
@@ -12,7 +12,8 @@
       "bundleIdentifier": "com.page4films.hitchwell",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "14"
     },
     "android": {
       "package": "com.page4films.hitchwell",
@@ -20,7 +21,8 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "versionCode": 2
     },
     "plugins": [
       "expo-router",
