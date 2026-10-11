@@ -13,6 +13,7 @@ import { useStore, CATEGORY_LABEL, DayType } from '../lib/store';
 import { buildInvoiceHtml, InvoiceLine } from '../lib/invoiceHtml';
 import { buildReceiptItems } from '../lib/receiptEmbed';
 import { mayExport } from '../lib/purchases';
+import { recordInvoiceCompleted } from '../lib/review';
 import { money, periodBounds, addDays, longDate } from '../lib/format';
 
 const TYPE_LABEL: Record<DayType, string> = { worked: 'Worked', travel: 'Travel', standby: 'Standby', off: 'Off' };
@@ -125,6 +126,7 @@ export default function InvoiceScreen() {
       }
       if (!exported) {
         bumpInvoiceCounter();
+        recordInvoiceCompleted(); // one count per screen visit, same as the counter
         setExported(true); // one bump per screen visit, not per re-share
       }
     } catch {
